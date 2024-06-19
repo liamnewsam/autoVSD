@@ -1,0 +1,27 @@
+
+
+#image-div {
+    object-fit: cover;
+}
+
+.canvas {
+    background-image: url(img8.jpg);
+    background-position: 50% 50%;
+    background-size: contain;
+    background-repeat: no-repeat;
+
+}
+
+.empty {
+    pointer-events: none;
+}
+
+#canvas-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#image-only {
+    position: 50% 50%;
+}

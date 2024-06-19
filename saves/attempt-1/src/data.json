@@ -1,0 +1,34 @@
+[
+    {
+        "hotspotName": "Hi",
+        "options": [
+            "one",
+            "two",
+            "three"
+        ]
+    },
+    {
+        "hotspotName": "Bic",
+        "options": [
+            "one",
+            "two",
+            "three"
+        ]
+    },
+    {
+        "hotspotName": "Soo",
+        "options": [
+            "one",
+            "two",
+            "three"
+        ]
+    },
+    {
+        "hotspotName": "Lum",
+        "options": [
+            "one",
+            "two",
+            "three"
+        ]
+    }
+]

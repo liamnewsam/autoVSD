@@ -1,0 +1,38 @@
+#container {
+  display: flex;
+  height: 100vh; /* 100% of the viewport height */
+
+}
+
+#left-half, #right-half {
+  flex: 1;
+  padding: 20px;
+}
+
+#left-half {
+  background-color: rgb(238, 211, 211);
+  display: flex;
+  flex-direction: column;
+}
+
+#right-half {
+  background-color: rgb(190, 224, 224);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two columns of equal width */
+  grid-template-rows: repeat(4, 1fr);   /* Four rows of equal height */
+  gap: 20px; /* Optional: adds space between grid items */
+  height: 100vh; /* Optional: makes the grid container span the full viewport height */
+
+}
+
+#image {
+  flex: 1;
+  background-color: antiquewhite;
+  margin-bottom: 10px;
+}
+
+#editor {
+  flex: 1;
+  background-color: rgb(197, 190, 181);
+  margin-top: 10px;
+}

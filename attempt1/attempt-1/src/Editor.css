@@ -1,0 +1,59 @@
+:root {
+    --option-box-size: 37.8px;
+  }
+
+.editor-container {
+    flex: 1;
+
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    height: 100%;
+}
+
+.editor-hotspot-name {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.editor-options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.editor-option {
+    background-color: #eee;
+    border-radius: 4px;
+    margin: 5px;
+    padding: 5px 10px;
+    height: var(--option-box-size);
+
+    
+}
+
+.editor-input {
+    border: none;
+    border-bottom: 2px solid red;
+    background-color: transparent;
+}
+
+.editor-input:focus {
+    outline: none;
+}
+
+.editor-option-delete {
+    position: relative;
+    float: right;
+}
+
+.editor-option-add-list-item {
+    height: 37.8px !important;
+}
+
+.editor-option-add {
+    background-color: red !important;
+    float: right; 
+}

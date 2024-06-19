@@ -1,0 +1,45 @@
+.hotSpotInfo {
+    flex: 1;
+
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.hotSpotName {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.option {
+    background-color: #eee;
+    border-radius: 4px;
+    margin: 5px;
+    padding: 5px 10px;
+}
+
+.close-button {
+    background-color: #04AA6D; /* Green */
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+    /*display: fixed;*/
+    font-size: 16px;
+
+    position: relative;
+    float: right;
+}
+
+.info-focus {
+    background-color: rgb(253, 192, 192);
+}
