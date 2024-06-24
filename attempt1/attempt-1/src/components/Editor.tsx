@@ -1,4 +1,5 @@
-import "./Editor.css";
+import "../style/Editor.css";
+
 import Hotspot from "./interfaces";
 import { getRandomInt, indexOf, myHotspot } from "./functions.tsx";
 

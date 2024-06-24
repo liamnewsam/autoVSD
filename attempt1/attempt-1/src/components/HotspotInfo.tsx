@@ -1,4 +1,4 @@
-import "./HotSpotInfo.css";
+import "../style/HotSpotInfo.css";
 import Hotspot from "./interfaces.tsx";
 import { getRandomInt, indexOf, myHotspot } from "./functions.tsx";
 

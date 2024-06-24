@@ -1,21 +1,30 @@
-import "./ImageDraw.css";
 import { useRef, useEffect, useState } from "react";
 import { Simplify, ISimplifyObjectPoint } from "simplify-ts";
+
+import "../style/ImageDraw.css";
+
 import Hotspot from "./interfaces.tsx";
 import { getRandomInt, indexOf, myHotspot } from "./functions.tsx";
+
+import imageObject from "../assets/ex1.png";
 
 const tolerance: number = 5;
 const highQuality: boolean = true;
 
 interface ImageDrawProps {
-  image: string;
+  hotspotImage: string;
   hotspots: Hotspot[];
   hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
   focusID: number;
 }
 
-function ImageDraw({ image, hotspots, setHotspots, focusID }: ImageDrawProps) {
+function ImageDraw({
+  hotspotImage,
+  hotspots,
+  setHotspots,
+  focusID,
+}: ImageDrawProps) {
   let hotspotsClone = structuredClone(hotspots);
   let hs = myHotspot(focusID, hotspotsClone);
   let hsIndex = indexOf(focusID, hotspots);
@@ -74,7 +83,6 @@ function ImageDraw({ image, hotspots, setHotspots, focusID }: ImageDrawProps) {
     hs = myHotspot(focusID, hotspots);
     //console.log(hs);
     if (hs && hs.points.length > 1) {
-      console.log("intersting");
       context.beginPath();
       context.moveTo(hs.points[0].x, hs.points[0].y);
       for (let i = 1; i < hs.points.length; i++) {
@@ -96,7 +104,6 @@ function ImageDraw({ image, hotspots, setHotspots, focusID }: ImageDrawProps) {
     if (drawingData.length > 0) {
       updateData();
     } else drawHotspot();
-    console.log(drawingData.length);
   }, [drawingData]);
 
   useEffect(() => {
@@ -128,6 +135,7 @@ function ImageDraw({ image, hotspots, setHotspots, focusID }: ImageDrawProps) {
       context.stroke();
 
       //setDrawingData((prevData) => [...prevData, { x: offsetX, y: offsetY }]);
+
       setDrawingData((prevData) => [...prevData, { x: offsetX, y: offsetY }]);
     };
 
@@ -212,9 +220,10 @@ function ImageDraw({ image, hotspots, setHotspots, focusID }: ImageDrawProps) {
     height: "100%",
     maxWidth: "100%",
     maxHeight: "100%",
+    backgroundImage: `url(${hotspotImage})`,
     //border: "1px solid black",
   };
-
+  //console.log(hotspotImage);
   return (
     <div id="canvas-container">
       <canvas
@@ -225,6 +234,7 @@ function ImageDraw({ image, hotspots, setHotspots, focusID }: ImageDrawProps) {
         className={
           "canvas" + (indexOf(focusID, hotspots) != -1 ? "" : " empty")
         }
+        id="canvas"
       />
     </div>
   );

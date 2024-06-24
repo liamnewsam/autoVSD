@@ -1,0 +1,22 @@
+#camera-canvas {
+    display: none;
+}
+#video {
+    display: absolute;
+}
+#start-button {
+    position: absolute;
+    top: 50%;
+    right: 5%;
+    transform: translate(-50%, -50%);
+    /*font-size: 200%;*/
+    width: 5%;
+    aspect-ratio : 1 / 1;
+    background-color: rgba(255, 161, 161, 0.8);
+    color: transparent;
+    border: none;
+    border-radius: 100%;
+    padding: none;
+    margin: none;
+
+}

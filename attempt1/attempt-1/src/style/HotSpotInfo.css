@@ -1,0 +1,87 @@
+.hotSpotInfo {
+    flex: 1;
+
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.hotSpotName {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+.options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.option {
+    background-color: #eee;
+    border-radius: 4px;
+    margin: 5px;
+    padding: 5px 10px;
+}
+/*
+.close-button {
+    background-color: #04AA6D; 
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+
+    font-size: 16px;
+
+    position: relative;
+    float: right;
+}*/
+
+.close-button {
+    background-color: rgb(255, 184, 196);
+    border: none;
+    border-radius: 20%;
+    color: white;
+    width: 20%;
+    aspect-ratio : 1 / 1;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    position: relative;
+    float: right;
+    transform: translate(25%, -25%);
+}
+
+.info-focus {
+    background-color: rgb(192, 223, 253);
+}
+
+.add-hotspot {
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    width: 75px;
+    height: 75px;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+
+    /* Positioning properties */
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+  }

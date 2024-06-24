@@ -5,7 +5,7 @@
 }
 
 .canvas {
-    background-image: url(img8.jpg);
+    /*background-image: url(../assets/img8.jpg);*/
     background-position: 50% 50%;
     background-size: contain;
     background-repeat: no-repeat;
