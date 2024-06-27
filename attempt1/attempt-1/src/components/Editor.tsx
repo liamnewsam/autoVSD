@@ -46,7 +46,7 @@ function Editor({
                 className="editor-input"
               />
               <button
-                className="editor-option-delete"
+                className="editor-option-button delete-button"
                 onClick={() => {
                   hotspotsClone[hsIndex].options.splice(index, 1);
                   setHotspots(hotspotsClone);
@@ -58,11 +58,13 @@ function Editor({
           ))}
           <li className="editor-option editor-option-add-list-item">
             <button
-              className="editor-option-add"
+              className="editor-option-button add-button"
               onClick={() => {
-                hotspotsClone[hsIndex].options.push("");
-                setHotspots(hotspotsClone);
-                console.log("I've been PUSHEDD");
+                if (hs.options.length < 4) {
+                  hotspotsClone[hsIndex].options.push("");
+                  setHotspots(hotspotsClone);
+                  console.log("I've been PUSHEDD");
+                }
               }}
             >
               +

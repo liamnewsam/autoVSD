@@ -44,16 +44,32 @@
     outline: none;
 }
 
-.editor-option-delete {
+.editor-option-button {
     position: relative;
     float: right;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+
+    border: none;
+    border-radius: 20%;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    justify-content: center;
+    align-items: center;
+
+
+}
+
+.delete-button {
+    background-color: rgb(255, 184, 196);
+
 }
 
 .editor-option-add-list-item {
     height: 37.8px !important;
 }
 
-.editor-option-add {
-    background-color: red !important;
-    float: right; 
+.add-button {
+    background-color: #4CAF50;
 }
