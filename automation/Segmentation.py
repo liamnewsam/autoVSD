@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 import time
 
-import grid
+import Grid
 times = [time.time()]
 
 def show_mask(mask, ax, random_color=False):
@@ -130,7 +130,7 @@ def filter_data(data):
             terminal += 1
         initial += 1
 
-def compute_masks_and_grid(img_url, sam_url="./sam_vit_h_4b8939.pth"):
+def compute_masks_and_grid(img_url, sam_url):
     img1 = cv2.imread(img_url)
     img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
     sam = sam_model_registry["default"](checkpoint=sam_url)
@@ -142,7 +142,7 @@ def compute_masks_and_grid(img_url, sam_url="./sam_vit_h_4b8939.pth"):
     #time_differences = [times[i] - times[i-1] for i in range(1, len(times))]
     #print(time_differences)
 
-    grid_image = grid.create_grid_image(img1, [datum[0][2] for datum in data])
+    grid_image = Grid.create_grid_image(img1, [datum[0][2] for datum in data])
     return data, grid_image
 
 def show_image(img):
@@ -150,7 +150,7 @@ def show_image(img):
     plt.imshow(img)
     plt.show()
 
-show_image(compute_masks_and_grid("../samplePhotos/img6.jpg", "../sam_vit_h_4b8939.pth")[1])
+#show_image(compute_masks_and_grid("../samplePhotos/img6.jpg", "../sam_vit_h_4b8939.pth")[1])
 
 '''
 img1 = cv2.imread('../samplePhotos/img6.jpg')

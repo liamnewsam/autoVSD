@@ -20,7 +20,7 @@ function App() {
   //              2 = editing hotspot
   //              3 = final hotspot
 
-  let [appState, setAppState] = useState(1);
+  let [appState, setAppState] = useState(2);
   let [hotspotImage, setHotspotImage] = useState("");
 
   useEffect(() => {
