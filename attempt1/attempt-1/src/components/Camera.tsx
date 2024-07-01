@@ -8,18 +8,18 @@ function Camera({ setHotspotImage }: CameraProps) {
   // |streaming| indicates whether or not we're currently streaming
   // video from the camera. Obviously, we start at false.
 
-  let streaming = false;
+  //let streaming = false;
 
   let video: HTMLVideoElement;
   let canvas: HTMLCanvasElement;
-  let photo: HTMLImageElement;
+  //let photo: HTMLImageElement;
 
   navigator.mediaDevices
     .getUserMedia({ video: true })
     .then((mediaStream) => {
       video = document.getElementById("video") as HTMLVideoElement;
       canvas = document.getElementById("camera-canvas") as HTMLCanvasElement;
-      photo = document.getElementById("photo") as HTMLImageElement;
+      //photo = document.getElementById("photo") as HTMLImageElement;
       if (video === null || canvas === null) return;
       video.srcObject = mediaStream;
       video.onloadedmetadata = () => {
@@ -31,7 +31,7 @@ function Camera({ setHotspotImage }: CameraProps) {
         canvas.setAttribute("width", video.videoWidth + "px");
         canvas.setAttribute("height", video.videoHeight + "px");
 
-        streaming = true;
+        //streaming = true;
         video.play();
       };
     })
@@ -43,9 +43,9 @@ function Camera({ setHotspotImage }: CameraProps) {
   // Fill the photo with an indication that none has been
   // captured.
 
-  function clearphoto() {
+  /*function clearphoto() {
     setHotspotImage("");
-  }
+  }*/
 
   // Capture a photo by fetching the current contents of the video
   // and drawing it into a canvas, then converting that to a PNG

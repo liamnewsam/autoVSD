@@ -1,7 +1,7 @@
 import "../style/Editor.css";
 
 import Hotspot from "./interfaces";
-import { getRandomInt, indexOf, myHotspot } from "./functions.tsx";
+import { indexOf, myHotspot } from "./functions.tsx";
 
 export interface HotSpotData {
   hotspots: Hotspot[];

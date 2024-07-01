@@ -4,9 +4,7 @@ import { Simplify, ISimplifyObjectPoint } from "simplify-ts";
 import "../style/ImageDraw.css";
 
 import Hotspot from "./interfaces.tsx";
-import { getRandomInt, indexOf, myHotspot } from "./functions.tsx";
-
-import imageObject from "../assets/ex1.png";
+import { indexOf, myHotspot } from "./functions.tsx";
 
 const tolerance: number = 5;
 const highQuality: boolean = true;
@@ -27,7 +25,7 @@ function ImageDraw({
 }: ImageDrawProps) {
   let hotspotsClone = structuredClone(hotspots);
   let hs = myHotspot(focusID, hotspotsClone);
-  let hsIndex = indexOf(focusID, hotspots);
+  //let hsIndex = indexOf(focusID, hotspots);
 
   /*return (
     <div id="image-div">
@@ -80,6 +78,11 @@ function ImageDraw({
     context.lineJoin = "round";
     context.fillStyle = "rgba(50, 50, 50, 0.6)";
 
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.fillStyle = "rgba(0, 0, 0, 1)";
+    context.globalCompositeOperation = "destination-out";
+
     hs = myHotspot(focusID, hotspots);
     //console.log(hs);
     if (hs && hs.points.length > 1) {
@@ -92,7 +95,17 @@ function ImageDraw({
 
       context.fill();
       context.closePath();
+
+      const imgdata = canvas.toDataURL("image/png");
+      fetch("http://localhost:5000/api/send-mask", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(imgdata),
+      });
     }
+    context.globalCompositeOperation = "source-over";
   };
 
   useEffect(() => {

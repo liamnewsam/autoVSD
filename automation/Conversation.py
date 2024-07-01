@@ -11,30 +11,37 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode('utf-8')
 
 class Message:
-    def __init__(self, text, role="user",imgPath=None):
+    def __init__(self, text, role="user",imgPaths=[][:]):
         self.role = role
         self.text = text
-        self.img = None
-        if imgPath:
-            self.img = encode_image(imgPath)
+        self.imgStrings = []
+        self.imgPaths = imgPaths
+        if imgPaths:
+            self.imgStrings = [encode_image(imgPath) for imgPath in imgPaths]
             
 class Conversation:
-    def __init__(self):
+    def __init__(self, headers=None, payload=None):
         self.conversation = []
-
-        self.headers = {
+        if headers:
+            self.headers = headers
+        else:
+            self.headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {api_key}"
-        }
-        self.payload = {
-            "model": "gpt-4-vision-preview",
+            }
+        if payload:
+            self.payload = payload
+        else:
+            self.payload = {
+            "model": "gpt-4o",
             "max_tokens": 500,
             "messages": []
-        }
+            }
     def message_to_json(self, message):
         msg = {"role":message.role, "content": [{"type":"text","text":message.text}]}
-        if message.img:
-            msg["content"].append({"type":"image_url", "image_url": {"url":f"data:image/jpeg;base64,{message.img}"}})
+        if message.imgStrings:
+            for img in message.imgStrings:
+                msg["content"].append({"type":"image_url", "image_url": {"url":f"data:image/jpeg;base64,{img}"}})
         return msg
     
     def speak(self, message):
@@ -52,9 +59,11 @@ class Conversation:
         self.payload["messages"].append(self.message_to_json(gpt_message))
         self.conversation.append(gpt_message)
 
-        print(gpt_message.text)
+        print(gpt_message.text + "\n____________________________\n\n")
         return gpt_message.text
 
+    def copy(self):
+        return Conversation(headers=self.headers, payload=self.payload)
 
 
 

@@ -130,9 +130,48 @@ def filter_data(data):
             terminal += 1
         initial += 1
 
-def compute_masks_and_grid(img_url, sam_url):
+def gray_out_image(image, mask):
+    darken_factor = 0.7
+    brighten_factor = 1.3
+    """
+    Grays out parts of the image where the mask is False.
+    
+    Parameters:
+    - image: Input image as a NumPy array.
+    - mask: Binary mask as a NumPy array (same size as image).
+    
+    Returns:
+    - result: Image with grayed out regions where mask is False.
+    """
+    
+    # Invert the mask to create the gray out mask
+    gray_out_mask = ~mask
+
+    # Convert the image to grayscale
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # Stack the gray image to have the same number of channels as the original image
+    gray_image = cv2.cvtColor(gray_image, cv2.COLOR_GRAY2BGR)
+
+    # Darken the gray image by multiplying by the intensity factor
+    dark_gray_image = (gray_image * darken_factor).astype(np.uint8)
+
+    # Create a brightened version of the image
+    bright_image = np.clip(image * brighten_factor, 0, 255).astype(np.uint8)
+
+    # Apply the mask to darken the parts of the image where the mask is False
+    result = image.copy()
+    result[gray_out_mask] = dark_gray_image[gray_out_mask]
+    
+    # Apply the mask to brighten the parts of the image where the mask is True
+    result[mask] = bright_image[mask]
+
+    return result
+
+def compute_masks(img_url, sam_url):
+    mask_limit = 10;
     img1 = cv2.imread(img_url)
-    img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+    #img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
     sam = sam_model_registry["default"](checkpoint=sam_url)
     #times.append(time.time())
     data = generate(sam, img1, 10, 0)
@@ -142,8 +181,13 @@ def compute_masks_and_grid(img_url, sam_url):
     #time_differences = [times[i] - times[i-1] for i in range(1, len(times))]
     #print(time_differences)
 
-    grid_image = Grid.create_grid_image(img1, [datum[0][2] for datum in data])
-    return data, grid_image
+    masks = [datum[0][2] for datum in data][:mask_limit]
+    maskImages = []
+    for mask in masks:
+        maskImages.append(gray_out_image(img1, mask))
+    
+    #grid_image = Grid.create_grid_image(img1, [datum[0][2] for datum in data])
+    return data[:mask_limit], maskImages
 
 def show_image(img):
     plt.figure(figsize=(10,10))
