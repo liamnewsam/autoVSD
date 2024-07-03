@@ -29,7 +29,10 @@ function App() {
         hotspotName: hs.hotspotName,
         options: hs.options,
         id: getRandomInt(0, 500),
-        points: [],
+        defaultColor: [0, 0, 0, 0],
+        focusColor: [0, 0, 0, 0],
+        defaultMask: "",
+        focusMask: "",
       };
     })
   );
@@ -133,7 +136,10 @@ function App() {
                   hotspotName: "Hotspot",
                   options: ["option1", "option2", "option3"],
                   id: getRandomInt(0, 500),
-                  points: [],
+                  defaultColor: [0, 0, 0, 0],
+                  focusColor: [0, 0, 0, 0],
+                  defaultMask: "",
+                  focusMask: "",
                 });
                 setHotspots(hotspotsClone);
                 console.log("add!");

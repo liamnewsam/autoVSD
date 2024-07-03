@@ -189,6 +189,19 @@ def compute_masks(img_url, sam_url):
     #grid_image = Grid.create_grid_image(img1, [datum[0][2] for datum in data])
     return data[:mask_limit], maskImages
 
+def merge_masks(boolMasks):
+    if len(boolMasks) == 0:
+        raise Exception("boolMasks is empty!")
+    merged_mask = boolMasks[0]
+    for mask in boolMasks[1:]:
+        merged_mask = np.logical_or(merged_mask, mask)
+    return merged_mask
+
+def bake_mask(mask, color):
+    image = np.zeros((mask.shape[0], mask.shape[1], 4), dtype=np.uint8)
+    image[mask] = color
+    return image
+
 def show_image(img):
     plt.figure(figsize=(10,10))
     plt.imshow(img)

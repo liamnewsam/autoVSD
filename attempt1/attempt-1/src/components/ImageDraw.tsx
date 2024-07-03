@@ -6,15 +6,20 @@ import "../style/ImageDraw.css";
 import Hotspot from "./interfaces.tsx";
 import { indexOf, myHotspot } from "./functions.tsx";
 
-const tolerance: number = 5;
-const highQuality: boolean = true;
-
 interface ImageDrawProps {
   hotspotImage: string;
   hotspots: Hotspot[];
   hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
   focusID: number;
+}
+
+function arrayToRgba(arr: number[]): string {
+  if (arr.length !== 4) {
+    throw new Error("Array must have exactly four elements.");
+  }
+  const [r, g, b, a] = arr;
+  return `rgba(${r}, ${g}, ${b}, ${(a * 1.0) / 255})`;
 }
 
 function ImageDraw({
@@ -24,182 +29,35 @@ function ImageDraw({
   focusID,
 }: ImageDrawProps) {
   let hotspotsClone = structuredClone(hotspots);
-  let hs = myHotspot(focusID, hotspotsClone);
-  //let hsIndex = indexOf(focusID, hotspots);
-
-  /*return (
-    <div id="image-div">
-      <img src={image} className="image" />
-    </div>
-  );*/
+  let focusedHotspot = myHotspot(focusID, hotspotsClone);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [canvasDimensions, setCanvasDimensions] = useState<{
-    width: number;
-    height: number;
-  }>({ width: 0, height: 0 });
+
+  let [canvasDimensions, setCanvasDimensions] = useState([0, 0]);
+  const calculateCanvasSize = (imageW: number, imageH: number) => {
+    let parent = document.getElementById("canvas-container");
+    if (!parent) return;
+    let parentW = parent.clientWidth;
+    let parentH = parent.clientHeight;
+
+    let testWidth = ((parentH * 1.0) / imageH) * imageW;
+    if (testWidth <= parentW) {
+      setCanvasDimensions([testWidth, parentH]);
+    } else {
+      let testHeight = ((parentW * 1.0) / imageW) * imageH;
+      setCanvasDimensions([parentW, testHeight]);
+    }
+  };
+
+  let backgroundImage = new Image();
+  backgroundImage.src = hotspotImage;
+  backgroundImage.onload = () => {
+    calculateCanvasSize(backgroundImage.width, backgroundImage.height);
+  };
+
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [drawingData, setDrawingData] = useState<any[]>([]); // State to hold drawing data
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const resizeCanvas = () => {
-      const parent = canvas.parentElement;
-      if (!parent) return;
-
-      const { width, height } = parent.getBoundingClientRect();
-      setCanvasDimensions({ width, height });
-    };
-
-    // Initial resize
-    resizeCanvas();
-
-    // Resize canvas when the window is resized
-    window.addEventListener("resize", resizeCanvas);
-
-    return () => {
-      window.removeEventListener("resize", resizeCanvas);
-    };
-  }, []);
-
-  const drawHotspot = () => {
-    //console.log("HI");
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const context = canvas.getContext("2d");
-    if (!context) return;
-
-    context.strokeStyle = "black";
-    context.lineWidth = 2;
-    context.lineCap = "round";
-    context.lineJoin = "round";
-    context.fillStyle = "rgba(50, 50, 50, 0.6)";
-
-    context.fillRect(0, 0, canvas.width, canvas.height);
-
-    context.fillStyle = "rgba(0, 0, 0, 1)";
-    context.globalCompositeOperation = "destination-out";
-
-    hs = myHotspot(focusID, hotspots);
-    //console.log(hs);
-    if (hs && hs.points.length > 1) {
-      context.beginPath();
-      context.moveTo(hs.points[0].x, hs.points[0].y);
-      for (let i = 1; i < hs.points.length; i++) {
-        context.lineTo(hs.points[i].x, hs.points[i].y);
-        context.stroke();
-      }
-
-      context.fill();
-      context.closePath();
-
-      const imgdata = canvas.toDataURL("image/png");
-      fetch("http://localhost:5000/api/send-mask", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(imgdata),
-      });
-    }
-    context.globalCompositeOperation = "source-over";
-  };
-
-  useEffect(() => {
-    clearCanvas();
-    drawHotspot();
-  }, [focusID]);
-
-  useEffect(() => {
-    if (drawingData.length > 0) {
-      updateData();
-    } else drawHotspot();
-  }, [drawingData]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const context = canvas.getContext("2d");
-    if (!context) return;
-
-    context.strokeStyle = "black";
-    context.lineWidth = 2;
-    context.lineCap = "round";
-    context.lineJoin = "round";
-
-    const startDrawing = (event: MouseEvent | TouchEvent) => {
-      const { offsetX, offsetY } = getMousePosition(canvas, event);
-      context.beginPath();
-      context.moveTo(offsetX, offsetY);
-      setIsDrawing(true);
-
-      //setDrawingData((prevData) => [...prevData, { x: offsetX, y: offsetY }]);
-    };
-
-    const draw = (event: MouseEvent | TouchEvent) => {
-      if (!isDrawing) return;
-
-      const { offsetX, offsetY } = getMousePosition(canvas, event);
-      context.lineTo(offsetX, offsetY);
-      context.stroke();
-
-      //setDrawingData((prevData) => [...prevData, { x: offsetX, y: offsetY }]);
-
-      setDrawingData((prevData) => [...prevData, { x: offsetX, y: offsetY }]);
-    };
-
-    const finishDrawing = () => {
-      context.closePath();
-      setIsDrawing(false);
-
-      if (hs) {
-        //console.log("BABABA");
-        drawHotspot();
-      }
-
-      clearCanvas();
-    };
-
-    //canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("touchstart", startDrawing);
-    //canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("touchmove", draw);
-    //canvas.addEventListener("mouseup", finishDrawing);
-    canvas.addEventListener("touchend", finishDrawing);
-    //canvas.addEventListener("mouseleave", finishDrawing);
-
-    return () => {
-      //canvas.removeEventListener("mousedown", startDrawing);
-      canvas.removeEventListener("touchstart", startDrawing);
-      //canvas.removeEventListener("mousemove", draw);
-      canvas.removeEventListener("touchmove", draw);
-      //canvas.removeEventListener("mouseup", finishDrawing);
-      canvas.removeEventListener("touchend", finishDrawing);
-      //canvas.removeEventListener("mouseleave", finishDrawing);
-    };
-  }, [isDrawing]);
-
-  const updateData = () => {
-    let temp = [];
-    for (let i = 0; i < drawingData.length; i++) {
-      temp.push({ x: drawingData[i].x, y: drawingData[i].y });
-      //console.log(i);
-    }
-
-    const points: ISimplifyObjectPoint[] = temp;
-    const simplified_result = Simplify(points, tolerance, highQuality);
-    //console.log("we did it?");
-
-    if (hs) {
-      hs.points = simplified_result;
-    }
-
-    setHotspots(hotspotsClone);
-  };
+  const [readyToBake, setReadyToBake] = useState<boolean>(false);
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -208,41 +66,183 @@ function ImageDraw({
     const context = canvas.getContext("2d");
     if (!context) return;
 
+    console.log("why we ain't clearing?");
     context.clearRect(0, 0, canvas.width, canvas.height);
-    setDrawingData(() => []);
+    //setDrawingData(() => []);
   };
 
-  const getMousePosition = (
-    canvas: HTMLCanvasElement,
-    event: MouseEvent | TouchEvent
-  ) => {
+  useEffect(() => {
+    if (readyToBake) {
+      if (!focusedHotspot) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const context = canvas.getContext("2d");
+      if (!context) return;
+
+      //Once for default!
+      clearCanvas();
+
+      context.strokeStyle = "transparent";
+      context.fillStyle = arrayToRgba(focusedHotspot.defaultColor);
+
+      if (drawingData.length > 0) {
+        //console.log("ojojjojojoj");
+        context.beginPath();
+        context.moveTo(drawingData[0].x, drawingData[0].y);
+        for (let i = 1; i < drawingData.length; i++) {
+          context.lineTo(drawingData[i].x, drawingData[i].y);
+          context.stroke();
+        }
+        context.closePath();
+        context.fill();
+      }
+
+      focusedHotspot.defaultMask = canvas.toDataURL("image/png");
+
+      //Again for focus!
+      clearCanvas();
+
+      context.strokeStyle = "transparent";
+      context.fillStyle = arrayToRgba(focusedHotspot.focusColor);
+
+      if (drawingData.length > 0) {
+        //console.log("yessir");
+        context.beginPath();
+        context.moveTo(drawingData[0].x, drawingData[0].y);
+        for (let i = 1; i < drawingData.length; i++) {
+          context.lineTo(drawingData[i].x, drawingData[i].y);
+          context.stroke();
+        }
+        context.closePath();
+        context.fill();
+      }
+
+      focusedHotspot.focusMask = canvas.toDataURL("image/png");
+
+      //Finish
+      setHotspots(hotspotsClone);
+
+      setReadyToBake(false);
+    }
+  }, [readyToBake]);
+
+  const drawMasks = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    if (!focusedHotspot) return;
+
+    for (let hotspot of hotspots) {
+      //console.log(hotspot.focusMask);
+      let img = new Image();
+      img.onload = () => {
+        //console.log("okay, so atleast we are getting somowhere!");
+        context.drawImage(img, 0, 0, canvasDimensions[0], canvasDimensions[1]);
+      };
+      img.src =
+        hotspot.id == focusedHotspot.id
+          ? hotspot.focusMask
+          : hotspot.defaultMask;
+    }
+  };
+  /*
+  useEffect(() => {
+    if (drawingData.length > 0) {
+      drawMask();
+    }
+  }, [drawingData]);*/
+
+  useEffect(() => {
+    clearCanvas();
+    drawMasks();
+  }, [focusID]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    context.strokeStyle = "black";
+    context.lineWidth = 2;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.fillStyle = "rgba(50, 50, 50, 0.2)";
+
+    let currentDrawingData: any[] = [];
+
+    const startDrawing = (event: TouchEvent) => {
+      clearCanvas();
+
+      console.log("lets a go!");
+      const { offsetX, offsetY } = getMousePosition(canvas, event);
+      context.beginPath();
+      context.moveTo(offsetX, offsetY);
+      setIsDrawing(true);
+
+      currentDrawingData.push({ x: offsetX, y: offsetY });
+    };
+
+    const draw = (event: TouchEvent) => {
+      if (!isDrawing) return;
+
+      const { offsetX, offsetY } = getMousePosition(canvas, event);
+      console.log(offsetX, offsetY);
+      context.lineTo(offsetX, offsetY);
+      context.stroke();
+
+      currentDrawingData.push({ x: offsetX, y: offsetY });
+    };
+
+    const finishDrawing = () => {
+      console.log("phew");
+      context.closePath();
+      setDrawingData(currentDrawingData);
+      setReadyToBake(true);
+      setIsDrawing(false);
+    };
+
+    canvas.addEventListener("touchstart", startDrawing);
+    canvas.addEventListener("touchmove", draw);
+    canvas.addEventListener("touchend", finishDrawing);
+    canvas.addEventListener("touchcancel", finishDrawing);
+
+    return () => {
+      canvas.removeEventListener("touchstart", startDrawing);
+      canvas.removeEventListener("touchmove", draw);
+      canvas.removeEventListener("touchend", finishDrawing);
+      canvas.removeEventListener("touchcancel", finishDrawing);
+    };
+  }, [isDrawing]);
+
+  const getMousePosition = (canvas: HTMLCanvasElement, event: TouchEvent) => {
     const rect = canvas.getBoundingClientRect();
-    const clientX =
-      event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
-    const clientY =
-      event instanceof MouseEvent ? event.clientY : event.touches[0].clientY;
+    const touch = event.touches[0];
     return {
-      offsetX: clientX - rect.left,
-      offsetY: clientY - rect.top,
+      offsetX: touch.clientX - rect.left,
+      offsetY: touch.clientY - rect.top,
     };
   };
 
-  // Ensure canvas maintains its aspect ratio
   const style: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
+    //width: "100%",
+    //height: "100%",
     maxWidth: "100%",
     maxHeight: "100%",
     backgroundImage: `url(${hotspotImage})`,
-    //border: "1px solid black",
   };
-  //console.log(hotspotImage);
+
   return (
     <div id="canvas-container">
       <canvas
         ref={canvasRef}
-        width={canvasDimensions.width}
-        height={canvasDimensions.height}
+        width={canvasDimensions[0]}
+        height={canvasDimensions[1]}
         style={style}
         className={
           "canvas" + (indexOf(focusID, hotspots) != -1 ? "" : " empty")

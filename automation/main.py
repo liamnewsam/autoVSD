@@ -5,14 +5,44 @@ import time
 import os
 import threading
 import shutil
+import random
+
+alpha_value = 77
+colors = [
+    [[255, 182, 193, alpha_value], [255, 105, 180, alpha_value]],  # Light Pink -> Hot Pink
+    [[144, 238, 144, alpha_value], [0, 128, 0, alpha_value]],       # Light Green -> Green
+    [[173, 216, 230, alpha_value], [0, 191, 255, alpha_value]],     # Light Blue -> Deep Sky Blue
+    [[240, 230, 140, alpha_value], [255, 215, 0, alpha_value]],     # Khaki -> Gold
+    [[255, 222, 173, alpha_value], [255, 140, 0, alpha_value]],     # Navajo White -> Dark Orange
+    [[221, 160, 221, alpha_value], [128, 0, 128, alpha_value]],     # Plum -> Purple
+    [[255, 228, 225, alpha_value], [255, 69, 0, alpha_value]],      # Misty Rose -> Red Orange
+    [[176, 224, 230, alpha_value], [0, 0, 139, alpha_value]],       # Powder Blue -> Dark Blue
+    [[240, 248, 255, alpha_value], [0, 0, 255, alpha_value]],       # Alice Blue -> Blue
+    [[255, 250, 205, alpha_value], [255, 255, 0, alpha_value]],     # Lemon Chiffon -> Yellow
+]
+
+
 
 class Hotspot:
-    def __init__(self, hotspotName='', options=[]):
+    def __init__(self, hotspotName='', options=[], colors=[None, None], defaultMaskPath="", focusMaskPath=""):
         self.hotspotName = hotspotName
         self.options = options
+        self.defaultColor = colors[0]
+        self.focusColor = colors[1]
+        self.defaultMaskPath = defaultMaskPath
+        self.focusMaskPath = focusMaskPath
 
     def print(self):
         print (f"{self.hotspotName}: {self.options}")
+
+    def toJSON(self):
+        print(f"data:image/png;base64,{encode_image(self.defaultMaskPath)}")
+        return {"hotspotName": self.hotspotName,
+                "options": self.options, "id": random.randint(1, 500),
+                "defaultColor": self.defaultColor,
+                "focusColor": self.focusColor,
+                "defaultMask": f"data:image/png;base64,{encode_image(self.defaultMaskPath)}",
+                "focusMask": f"data:image/png;base64,{encode_image(self.focusMaskPath)}"}
 
 def delete_files_in_directory(directory_path):
    try:
@@ -61,6 +91,7 @@ def get_masks(img_url, sam_url, dataObject):
 
     delete_files_in_directory("./masks")
     for (i, mask_image) in enumerate(mask_images):
+        #print("yessir!!!!")
         cv2.imwrite(f"./masks/mask{i+1}.png",mask_image)
     print("finished masking")
 
@@ -73,6 +104,7 @@ Hotspot 1:
 - Option 1:
 - Option 2:
     '''
+    colorCopy = colors[:]
     gpt_response = gpt_response.split('\n')
     hotspots = []
     currHotspot = None
@@ -81,7 +113,7 @@ Hotspot 1:
         if "hotspot" in lowerLine and ":" in lowerLine:
             if currHotspot:
                 hotspots.append(currHotspot)
-            currHotspot = Hotspot(hotspotName=line.split(": ")[1], options=[])
+            currHotspot = Hotspot(hotspotName=line.split(": ")[1], options=[], colors=colorCopy.pop(random.randint(0, len(colorCopy)-1)))
         elif "option" in lowerLine and ":" in lowerLine:
             currHotspot.options.append(line.split(": ")[1])
 
@@ -89,7 +121,7 @@ Hotspot 1:
         hotspots.append(currHotspot)
     return hotspots
     
-def validate_mask(originalConversation, hotspots, hotspot_masks, message, lock):
+def validate_mask(originalConversation, hotspots, maskURLsPerHotspot, message, lock, hotspotMasks, maskData):
     conversation = originalConversation.copy()
     conversation.speak(message)
 
@@ -99,7 +131,8 @@ def validate_mask(originalConversation, hotspots, hotspot_masks, message, lock):
         with lock:
             for i in range(len(hotspots)):
                 if hotspots[i].hotspotName in response:
-                    hotspot_masks[i].append(message.imgPaths[1]) ## Important!!!, this is
+                    maskURLsPerHotspot[i].append(message.imgPaths[1]) ## Important!!!, this is
+                    hotspotMasks[i].append(maskData)
                     break
             else:
                 print("whatsapp dock")
@@ -144,27 +177,63 @@ hotspots you provided in your previous response (state which one it is)? You are
 #conversation.speak(Message(masks_prompt, imgPaths=["masks/mask3.png"]))
 
 def retrieve_data(user_img_url):
+    imageObject = cv2.imread(user_img_url)
+    imageWidth, imageHeight = imageObject.shape[1], imageObject.shape[0]
+    
     conversation = Conversation()
     t1 = threading.Thread(target=conversation.speak, args=[Message(hotspots_prompt, imgPaths=[user_img_url])])
+    maskData = []
+    t2 = threading.Thread(target=get_masks, args=[user_img_url, sam_url, maskData])
     t1.start()
+    t2.start()
     t1.join()
+    t2.join()
+    
     hotspots = parse_hotspots(conversation.conversation[-1].text)
+
+    maskURLsPerHotspot = [[] for _ in range(len(hotspots))]    
+    hotspotMasks = [[np.zeros((imageHeight, imageWidth), dtype=np.uint8)] for _ in range(len(hotspots))]
+    mask_validation_threads = [threading.Thread(target=validate_mask, args=[conversation, hotspots, maskURLsPerHotspot,
+                                Message(masks_prompt, imgPaths=[user_img_url, f"./masks/mask{i+1}.png"]), threading.Lock(), hotspotMasks, maskData[i][0][2]]) for i in range(len(os.listdir('./masks')))]
+    for thread in mask_validation_threads:
+        thread.start()
+    for thread in mask_validation_threads:
+        thread.join()
+
+    hotspotMasks = [merge_masks(masks) for masks in hotspotMasks]
+    bakedMasks = [[bake_mask(hotspotMasks[i], hotspots[i].defaultColor), bake_mask(hotspotMasks[i], hotspots[i].focusColor)] for i in range(len(hotspots))]
+
+
+    delete_files_in_directory("./hotspotMasks")
+    for i in range(len(hotspots)):
+        defaultPath = f"./hotspotMasks/{hotspots[i].hotspotName.replace(' ', '')}_default.png"
+        focusPath = f"./hotspotMasks/{hotspots[i].hotspotName.replace(' ', '')}_focus.png"
+        cv2.imwrite(defaultPath, bakedMasks[i][0])
+        cv2.imwrite(focusPath, bakedMasks[i][1])
+        hotspots[i].defaultMaskPath = defaultPath
+        hotspots[i].focusMaskPath = focusPath
+        print("finished one")
+        
+        
+
+    print("Done!")
     
     return hotspots
                           
 
 '''
 if __name__ == "__main__":
+
+    user_img_url="../samplePhotos/img6.jpg"
     conversation = Conversation()
 
-    t1 = threading.Thread(target=conversation.speak, args=[hotspots_message])
+    t1 = threading.Thread(target=conversation.speak, args=[Message(hotspots_prompt, imgPaths=[user_img_url])])
     maskData = []
-    t2 = threading.Thread(target=get_masks, args=[img_url, sam_url, maskData])
-
+    t2 = threading.Thread(target=get_masks, args=[user_img_url, sam_url, maskData])
     t1.start()
     t2.start()
     t1.join()
-    t2.join();
+    t2.join()
 
     hotspots = parse_hotspots(conversation.conversation[-1].text)
     for hotspot in hotspots:
@@ -172,11 +241,10 @@ if __name__ == "__main__":
     
     hotspot_masks = [[] for _ in range(len(hotspots))]
     lock = threading.Lock()
+    maskDataForEachHotspot = [[] for _ in range(len(hotspots))]
     mask_validation_threads = [threading.Thread(target=validate_mask, args=[conversation, hotspots, hotspot_masks,
-                                Message(masks_prompt, imgPaths=[f"./masks/mask{i+1}.png"]), lock]) for i in range(len(os.listdir('./masks')))]
+                                Message(masks_prompt, imgPaths=[user_img_url, f"./masks/mask{i+1}.png"]), lock, maskDataForEachHotspot, maskData[i][0][2]]) for i in range(len(os.listdir('./masks')))]
 
-    mask_validation_threads = [threading.Thread(target=validate_mask, args=[conversation, hotspots, hotspot_masks,
-                                Message(masks_prompt, imgPaths=[img_url, f"./masks/mask{i+1}.png"]), lock]) for i in range(len(os.listdir('./masks')))]
     for thread in mask_validation_threads:
         thread.start()
 

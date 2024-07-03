@@ -38,6 +38,7 @@ function HotSpotInfo({
             event.stopPropagation();
             hotspotsClone.splice(hsIndex, 1);
             setHotspots(hotspotsClone);
+            setFocusID(-1);
           }}
         >
           x
