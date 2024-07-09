@@ -6,11 +6,11 @@ export interface HotSpotData {
   hotspots: Hotspot[];
   hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
-  setFocusID: (x: number) => void;
+  setFocusID: (x: string) => void;
   //setHotspotDeletion: (id: number) => void;
 
-  focusID: number;
-  id: number;
+  focusID: string;
+  id: string;
 }
 
 function HotSpotInfo({
@@ -44,7 +44,7 @@ function HotSpotInfo({
             event.stopPropagation();
             hotspotsClone.splice(hsIndex, 1);
             setHotspots(hotspotsClone);
-            setFocusID(-1);
+            setFocusID("");
           }}
         >
           x

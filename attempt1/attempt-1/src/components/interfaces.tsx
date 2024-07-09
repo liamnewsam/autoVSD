@@ -1,11 +1,10 @@
 interface Hotspot {
   hotspotName: string;
   options: string[];
-  id: number;
+  id: string;
   defaultColor: number[];
   focusColor: number[];
-  defaultMask: string;
-  focusMask: string;
+  outlinePoints: { x: number; y: number }[];
 }
 
 export default Hotspot;

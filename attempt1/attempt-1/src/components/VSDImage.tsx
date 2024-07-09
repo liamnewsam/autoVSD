@@ -8,8 +8,8 @@ let marginSize = 10;
 interface VSDImageData {
   hotspotsImage: string;
   hotspots: Hotspot[];
-  focusID: number;
-  setFocusID: (x: number) => void;
+  focusID: string;
+  setFocusID: (x: string) => void;
   vsdMode: number;
 }
 

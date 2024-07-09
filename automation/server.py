@@ -22,8 +22,6 @@ def write_image(fileName, image_data):
     # Save the image
     cv2.imwrite(fileName, image)
 
-    return image.shape[1], image.shape[0]
-
 
 app = Flask(__name__)
 CORS(app)
@@ -39,9 +37,11 @@ user_img_url = "./userImage.png"
 @app.route('/api/send-data', methods=['POST'])
 def receive_data():
     image_data = request.json  # Assuming JSON data is sent
-    imgWidth, imgHeight = write_image(user_img_url, image_data)
+    write_image(user_img_url, image_data)
     
     hotspots = retrieve_data(user_img_url)
+    for hs in hotspots:
+        print (hs.toJSON())
 
     return jsonify([hs.toJSON() for hs in hotspots])
     

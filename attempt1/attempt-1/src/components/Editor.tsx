@@ -8,7 +8,7 @@ export interface HotSpotData {
   hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
 
-  focusID: number;
+  focusID: string;
 }
 
 function Editor({

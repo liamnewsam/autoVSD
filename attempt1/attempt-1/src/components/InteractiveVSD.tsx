@@ -8,8 +8,8 @@ interface InteractiveVSDData {
   hotspotsImage: string;
   hotspots: Hotspot[];
   setAppState: (x: number) => void;
-  focusID: number;
-  setFocusID: (x: number) => void;
+  focusID: string;
+  setFocusID: (x: string) => void;
 }
 
 function InteractiveVSD({

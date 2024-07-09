@@ -24,25 +24,16 @@ colors = [
 
 
 class Hotspot:
-    def __init__(self, hotspotName='', options=[], colors=[None, None], defaultMaskPath="", focusMaskPath=""):
+    def __init__(self, hotspotName='', options=[]):
         self.hotspotName = hotspotName
         self.options = options
-        self.defaultColor = colors[0]
-        self.focusColor = colors[1]
-        self.defaultMaskPath = defaultMaskPath
-        self.focusMaskPath = focusMaskPath
 
     def print(self):
         print (f"{self.hotspotName}: {self.options}")
 
     def toJSON(self):
-        print(f"data:image/png;base64,{encode_image(self.defaultMaskPath)}")
         return {"hotspotName": self.hotspotName,
-                "options": self.options, "id": random.randint(1, 500),
-                "defaultColor": self.defaultColor,
-                "focusColor": self.focusColor,
-                "defaultMask": f"data:image/png;base64,{encode_image(self.defaultMaskPath)}",
-                "focusMask": f"data:image/png;base64,{encode_image(self.focusMaskPath)}"}
+                "options": self.options}
 
 def delete_files_in_directory(directory_path):
    try:
@@ -113,7 +104,7 @@ Hotspot 1:
         if "hotspot" in lowerLine and ":" in lowerLine:
             if currHotspot:
                 hotspots.append(currHotspot)
-            currHotspot = Hotspot(hotspotName=line.split(": ")[1], options=[], colors=colorCopy.pop(random.randint(0, len(colorCopy)-1)))
+            currHotspot = Hotspot(hotspotName=line.split(": ")[1], options=[])
         elif "option" in lowerLine and ":" in lowerLine:
             currHotspot.options.append(line.split(": ")[1])
 
@@ -177,51 +168,9 @@ hotspots you provided in your previous response (state which one it is)? You are
 #conversation.speak(Message(masks_prompt, imgPaths=["masks/mask3.png"]))
 
 def retrieve_data(user_img_url):
-    imageObject = cv2.imread(user_img_url)
-    imageWidth, imageHeight = imageObject.shape[1], imageObject.shape[0]
-
-    print("yesasdfsdf")
-
     conversation = Conversation()
-    t1 = threading.Thread(target=conversation.speak, args=[Message(hotspots_prompt, imgPaths=[user_img_url])])
-    maskData = []
-    t2 = threading.Thread(target=get_masks, args=[user_img_url, sam_url, maskData])
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-    
+    conversation.speak(Message(hotspots_prompt, imgPaths=[user_img_url]))
     hotspots = parse_hotspots(conversation.conversation[-1].text)
-
-    maskURLsPerHotspot = [[] for _ in range(len(hotspots))]    
-    hotspotMasks = [[np.zeros((imageHeight, imageWidth), dtype=np.uint8)] for _ in range(len(hotspots))]
-    mask_validation_threads = [threading.Thread(target=validate_mask, args=[conversation, hotspots, maskURLsPerHotspot,
-                                Message(masks_prompt, imgPaths=[user_img_url, f"./masks/mask{i+1}.png"]), threading.Lock(), hotspotMasks, maskData[i][0][2]]) for i in range(len(os.listdir('./masks')))]
-    for thread in mask_validation_threads:
-        thread.start()
-    for thread in mask_validation_threads:
-        thread.join()
-
-    hotspotMasks = [merge_masks(masks) for masks in hotspotMasks]
-    bakedMasks = [[bake_mask(hotspotMasks[i], hotspots[i].defaultColor), bake_mask(hotspotMasks[i], hotspots[i].focusColor)] for i in range(len(hotspots))]
-
-
-    delete_files_in_directory("./hotspotMasks")
-    for i in range(len(hotspots)):
-        defaultPath = f"./hotspotMasks/{hotspots[i].hotspotName.replace(' ', '')}_default.png"
-        focusPath = f"./hotspotMasks/{hotspots[i].hotspotName.replace(' ', '')}_focus.png"
-        cv2.imwrite(defaultPath, bakedMasks[i][0])
-        cv2.imwrite(focusPath, bakedMasks[i][1])
-        hotspots[i].defaultMaskPath = defaultPath
-        hotspots[i].focusMaskPath = focusPath
-
-        print(f"The colors for the \"{hotspots[i].hotspotName}\" Hotspot are: \n{hotspots[i].defaultColor}\n{hotspots[i].focusColor}\n")
-        print("finished one")
-        print("\n\n")
-        
-
-    print("Done!")
-    
     return hotspots
                           
 

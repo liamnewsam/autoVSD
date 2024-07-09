@@ -11,7 +11,7 @@ interface ImageDrawProps {
   hotspots: Hotspot[];
   hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
-  focusID: number;
+  focusID: string;
 }
 
 function ImageDraw({
@@ -56,18 +56,9 @@ function ImageDraw({
   backgroundImage.src = hotspotImage;*/
 
   //This is because I don't know how to get masks to be drawn when they first get loaded into hotspots.
-  let [hasLoaded, setHasLoaded] = useState(false);
-  useEffect(() => {
-    if (!hasLoaded && hotspots.length > 0) {
-      console.log("we in here boys");
-      setHasLoaded(true);
-      drawMasks();
-    }
-  }, [hotspots]);
 
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [drawingData, setDrawingData] = useState<any[]>([]); // State to hold drawing data
-  const [readyToBake, setReadyToBake] = useState<boolean>(false);
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -81,72 +72,18 @@ function ImageDraw({
     //setDrawingData(() => []);
   };
 
-  useEffect(() => {
-    if (readyToBake) {
-      if (!focusedHotspot) return;
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const context = canvas.getContext("2d");
-      if (!context) return;
-
-      //Once for default!
-      clearCanvas();
-
-      context.strokeStyle = "transparent";
-      context.fillStyle = arrayToRgba(focusedHotspot.defaultColor, true);
-
-      if (drawingData.length > 0) {
-        //console.log("ojojjojojoj");
-        context.beginPath();
-        context.moveTo(drawingData[0].x, drawingData[0].y);
-        for (let i = 1; i < drawingData.length; i++) {
-          context.lineTo(drawingData[i].x, drawingData[i].y);
-          context.stroke();
-        }
-        context.closePath();
-        context.fill();
-      }
-
-      focusedHotspot.defaultMask = canvas.toDataURL("image/png");
-
-      //Again for focus!
-      clearCanvas();
-
-      context.strokeStyle = "transparent";
-      context.fillStyle = arrayToRgba(focusedHotspot.focusColor, true);
-
-      if (drawingData.length > 0) {
-        //console.log("yessir");
-        context.beginPath();
-        context.moveTo(drawingData[0].x, drawingData[0].y);
-        for (let i = 1; i < drawingData.length; i++) {
-          context.lineTo(drawingData[i].x, drawingData[i].y);
-          context.stroke();
-        }
-        context.closePath();
-        context.fill();
-      }
-
-      focusedHotspot.focusMask = canvas.toDataURL("image/png");
-
-      //Finish
-      setHotspots(hotspotsClone);
-
-      setReadyToBake(false);
-      setDrawingData([]);
-    } else {
-      clearCanvas();
-      drawMasks();
-    }
-  }, [readyToBake]);
-
-  const drawMasks = (exclude: number[] = []) => {
+  const drawOutlines = (exclude: string[] = []) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const context = canvas.getContext("2d");
     if (!context) return;
+
+    context.strokeStyle = "black";
+    context.lineWidth = 2;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.fillStyle = "rgba(50, 50, 50, 0.2)";
 
     for (let hotspot of hotspots) {
       if (exclude.indexOf(hotspot.id) > -1) {
@@ -154,13 +91,17 @@ function ImageDraw({
         continue;
       }
       //console.log(hotspot.focusMask);
-      let img = new Image();
-      img.onload = () => {
-        //console.log("okay, so atleast we are getting somowhere!");
-        context.drawImage(img, 0, 0, canvasDimensions[0], canvasDimensions[1]);
-        console.log("What?");
-      };
-      img.src = hotspot.id == focusID ? hotspot.focusMask : hotspot.defaultMask;
+      if (hotspot.outlinePoints.length < 1) continue;
+
+      console.log("at least we are in here!");
+      //context.beginPath();
+      context.moveTo(hotspot.outlinePoints[0].x, hotspot.outlinePoints[0].y);
+      for (let i = 1; i < hotspot.outlinePoints.length; i++) {
+        let point = hotspot.outlinePoints[i];
+        context.lineTo(point.x, point.y);
+        context.stroke();
+      }
+      //context.closePath();
     }
   };
   /*
@@ -173,9 +114,18 @@ function ImageDraw({
   useEffect(() => {
     //console.log("we should be drawing cuz focusID updated!");
     clearCanvas();
-    drawMasks();
+    drawOutlines();
     console.log("currently focused ID is:", focusID);
   }, [focusID]);
+
+  useEffect(() => {
+    if (focusedHotspot && drawingData.length > 0) {
+      console.log("YESirrrrrrrrr");
+      focusedHotspot.outlinePoints = drawingData;
+      setHotspots(hotspotsClone);
+      setDrawingData([]);
+    }
+  }, [drawingData]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -196,7 +146,7 @@ function ImageDraw({
 
     if (isDrawing) {
       clearCanvas();
-      drawMasks([focusID]);
+      drawOutlines([focusID]);
     }
 
     const startDrawing = (event: TouchEvent) => {
@@ -205,7 +155,7 @@ function ImageDraw({
 
       console.log("lets a go!");
       const { offsetX, offsetY } = getMousePosition(canvas, event);
-      context.beginPath();
+      //context.beginPath();
       context.moveTo(offsetX, offsetY);
 
       currentDrawingData.push({ x: offsetX, y: offsetY });
@@ -224,10 +174,10 @@ function ImageDraw({
 
     const finishDrawing = () => {
       console.log("phew");
-      context.closePath();
-      setDrawingData(currentDrawingData);
-      setReadyToBake(true);
+      //context.closePath();
       setIsDrawing(false);
+
+      setDrawingData(currentDrawingData);
     };
 
     canvas.addEventListener("touchstart", startDrawing);

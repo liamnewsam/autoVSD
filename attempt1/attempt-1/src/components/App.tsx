@@ -29,7 +29,7 @@ function App() {
   let [hotspots, setHotspots] = useState<Hotspot[]>([]);
   //console.log(hotspots);
   let hotspotsClone = structuredClone(hotspots);
-  let [focusHotSpotID, setFocusHotSpotID] = useState(-1);
+  let [focusHotSpotID, setFocusHotSpotID] = useState("");
 
   const sendImageToBackend = async () => {
     try {
@@ -46,13 +46,26 @@ function App() {
       }
 
       const responseData = await response.json();
-      setHotspots(responseData); // Set response data in state
+      setHotspots(
+        responseData.map(
+          (datum: { hotspotName: string; options: string[] }) => ({
+            hotspotName: datum.hotspotName,
+            options: datum.options,
+            id: crypto.randomUUID(),
+            defaultColor: [50, 50, 50, 50],
+            focusColor: [200, 200, 200, 0],
+            outlinePoints: [],
+          })
+        )
+      ); // Set response data in state
       setAppState(3);
     } catch (error) {
       console.error("Error sending data:", error);
       // Handle error state if needed
     }
   };
+
+  console.log(hotspots);
 
   useEffect(() => {
     if (hotspotImage) {
@@ -65,7 +78,7 @@ function App() {
     if (appState == 1) {
       setHotspotImage("");
       setHotspots([]);
-      setFocusHotSpotID(-1);
+      setFocusHotSpotID("");
     }
 
     if (appState == 4) {
@@ -77,7 +90,7 @@ function App() {
         },
         body: JSON.stringify({ hotspots: hotspots, image: hotspotImage }),
       });*/
-      setFocusHotSpotID(-1);
+      setFocusHotSpotID("");
     }
   }, [appState]);
 
@@ -150,11 +163,10 @@ function App() {
                   hotspotsClone.push({
                     hotspotName: "Hotspot",
                     options: ["option1", "option2", "option3"],
-                    id: getRandomInt(0, 500),
+                    id: crypto.randomUUID(),
                     defaultColor: [0, 0, 0, 0],
                     focusColor: [0, 0, 0, 0],
-                    defaultMask: "",
-                    focusMask: "",
+                    outlinePoints: [],
                   });
                   setHotspots(hotspotsClone);
                   console.log("add!");
