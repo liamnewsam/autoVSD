@@ -89,15 +89,27 @@ def generate(sam, image, resolution, maskSimilarityForRejection):
             yPos = int((len(image) * 1.0 / resolution) * i)
             xPos = int((len(image[0]) * 1.0 / resolution) * j)
             points.append([xPos, yPos])
+    print("yeyeyeyeyeyeeyye")
     times.append(time.time())
+    print("babynomoney")
+
     predictor = SamPredictor(sam)
+
+    print("why why why?")
     predictor.set_image(image)
+
+    print("ok so this is all we got")
 
     times.append(time.time())
 
     
     data = [predictor.predict(point_coords=np.array([point]),point_labels=np.array([1]),multimask_output=True) for point in points]
+
+    print("interesting...")
     data.sort(key=lambda datum: np.sum(datum[0][2]), reverse=True)
+
+    #predictor.reset_image()
+    print("wel wel wel")
     return data
 
 def hamming_distance(arr1, arr2):
@@ -172,11 +184,17 @@ def compute_masks(img_url, sam_url):
     mask_limit = 10;
     img1 = cv2.imread(img_url)
     #img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+    print("are we getting here?")
     sam = sam_model_registry["default"](checkpoint=sam_url)
+    print("howabout heare?")
+
     #times.append(time.time())
     data = generate(sam, img1, 10, 0)
+    print("hesesiheishehisheihsi")
     #times.append(time.time())
     filter_data(data)
+    print("we filtering even?")
+
     #times.append(time.time())
     #time_differences = [times[i] - times[i-1] for i in range(1, len(times))]
     #print(time_differences)
@@ -198,6 +216,7 @@ def merge_masks(boolMasks):
     return merged_mask
 
 def bake_mask(mask, color):
+    color = color[::-1][1:] + [color[-1]]
     image = np.zeros((mask.shape[0], mask.shape[1], 4), dtype=np.uint8)
     image[mask] = color
     return image

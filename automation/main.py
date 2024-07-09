@@ -179,7 +179,9 @@ hotspots you provided in your previous response (state which one it is)? You are
 def retrieve_data(user_img_url):
     imageObject = cv2.imread(user_img_url)
     imageWidth, imageHeight = imageObject.shape[1], imageObject.shape[0]
-    
+
+    print("yesasdfsdf")
+
     conversation = Conversation()
     t1 = threading.Thread(target=conversation.speak, args=[Message(hotspots_prompt, imgPaths=[user_img_url])])
     maskData = []
@@ -212,8 +214,10 @@ def retrieve_data(user_img_url):
         cv2.imwrite(focusPath, bakedMasks[i][1])
         hotspots[i].defaultMaskPath = defaultPath
         hotspots[i].focusMaskPath = focusPath
+
+        print(f"The colors for the \"{hotspots[i].hotspotName}\" Hotspot are: \n{hotspots[i].defaultColor}\n{hotspots[i].focusColor}\n")
         print("finished one")
-        
+        print("\n\n")
         
 
     print("Done!")

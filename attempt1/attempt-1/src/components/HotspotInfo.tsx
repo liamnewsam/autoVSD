@@ -1,6 +1,6 @@
 import "../style/HotSpotInfo.css";
 import Hotspot from "./interfaces.tsx";
-import { indexOf, myHotspot } from "./functions.tsx";
+import { indexOf, myHotspot, arrayToRgba } from "./functions.tsx";
 
 export interface HotSpotData {
   hotspots: Hotspot[];
@@ -29,6 +29,12 @@ function HotSpotInfo({
       <div
         className={"hotSpotInfo" + (id === focusID ? " info-focus" : "")}
         onClick={() => setFocusID(id)}
+        style={{
+          backgroundColor:
+            id === focusID
+              ? arrayToRgba(hs.focusColor, false)
+              : arrayToRgba(hs.defaultColor, false),
+        }}
       >
         <button
           type="button"

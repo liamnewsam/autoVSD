@@ -9,9 +9,12 @@ import ImageDraw from "./ImageDraw.tsx";
 import Camera from "./Camera.tsx";
 import HotspotMenu from "./HotspotMenu.tsx";
 import Hotspot from "./interfaces.tsx";
+import InteractiveVSD from "./InteractiveVSD.tsx";
 import { getRandomInt } from "./functions.tsx";
+import LoadingOverlay from "./LoadingOverlay.tsx";
 
-import data from "../assets/data.json";
+import sampleVSDData from "../assets/sampleVSD.json";
+
 //import imageObject from "../assets/ex1.png";
 
 function App() {
@@ -23,19 +26,8 @@ function App() {
 
   let [appState, setAppState] = useState(1);
   let [hotspotImage, setHotspotImage] = useState("");
-  let [hotspots, setHotspots] = useState<Hotspot[]>(
-    data.map((hs) => {
-      return {
-        hotspotName: hs.hotspotName,
-        options: hs.options,
-        id: getRandomInt(0, 500),
-        defaultColor: [0, 0, 0, 0],
-        focusColor: [0, 0, 0, 0],
-        defaultMask: "",
-        focusMask: "",
-      };
-    })
-  );
+  let [hotspots, setHotspots] = useState<Hotspot[]>([]);
+  //console.log(hotspots);
   let hotspotsClone = structuredClone(hotspots);
   let [focusHotSpotID, setFocusHotSpotID] = useState(-1);
 
@@ -69,6 +61,26 @@ function App() {
     }
   }, [hotspotImage]);
 
+  useEffect(() => {
+    if (appState == 1) {
+      setHotspotImage("");
+      setHotspots([]);
+      setFocusHotSpotID(-1);
+    }
+
+    if (appState == 4) {
+      /*
+      fetch("http://localhost:5000/api/send-VSD", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ hotspots: hotspots, image: hotspotImage }),
+      });*/
+      setFocusHotSpotID(-1);
+    }
+  }, [appState]);
+
   /*useEffect(() => {
     let deleteIndex = indexOf(hotspotDeletion, hotspots);
     setHotspots(
@@ -87,69 +99,84 @@ function App() {
       </div>
     );
   }
+  /*
   if (appState == 2) {
     return <div>Loading</div>;
-  }
-  if (appState == 3) {
+  }*/
+  if (appState == 2 || appState == 3) {
     return (
-      <div id="container">
-        <div id="left-half">
-          <div id="image-container">
-            <ImageDraw
-              //hotspotImage={hotspotImage}
-              hotspotImage={hotspotImage}
-              hotspots={hotspots}
-              hotspotsClone={hotspotsClone}
-              setHotspots={setHotspots}
-              focusID={focusHotSpotID}
-            />
+      <>
+        {appState == 2 && <LoadingOverlay />}
+        <div id="container">
+          <div id="left-half">
+            <div id="image-container">
+              <ImageDraw
+                //hotspotImage={hotspotImage}
+                hotspotImage={hotspotImage}
+                hotspots={hotspots}
+                hotspotsClone={hotspotsClone}
+                setHotspots={setHotspots}
+                focusID={focusHotSpotID}
+              />
+            </div>
+            <div id="editor-container">
+              <Editor
+                hotspots={hotspots}
+                hotspotsClone={hotspotsClone}
+                setHotspots={setHotspots}
+                focusID={focusHotSpotID}
+              />
+            </div>
+            <div id="hotspot-menu-container">
+              <HotspotMenu setAppState={setAppState} />
+            </div>
           </div>
-          <div id="editor-container">
-            <Editor
-              hotspots={hotspots}
-              hotspotsClone={hotspotsClone}
-              setHotspots={setHotspots}
-              focusID={focusHotSpotID}
-            />
-          </div>
-          <div id="hotspot-menu-container">
-            <HotspotMenu />
+          <div id="right-half">
+            {hotspots.map((items, index) => (
+              <HotSpotInfo
+                hotspots={hotspots}
+                hotspotsClone={hotspotsClone}
+                setHotspots={setHotspots}
+                setFocusID={setFocusHotSpotID}
+                focusID={focusHotSpotID}
+                id={items.id}
+                key={index}
+              />
+            ))}
+            <div
+              className="add-hotspot"
+              onClick={() => {
+                if (hotspots.length < 6) {
+                  hotspotsClone.push({
+                    hotspotName: "Hotspot",
+                    options: ["option1", "option2", "option3"],
+                    id: getRandomInt(0, 500),
+                    defaultColor: [0, 0, 0, 0],
+                    focusColor: [0, 0, 0, 0],
+                    defaultMask: "",
+                    focusMask: "",
+                  });
+                  setHotspots(hotspotsClone);
+                  console.log("add!");
+                }
+              }}
+            >
+              +
+            </div>
           </div>
         </div>
-        <div id="right-half">
-          {hotspots.map((items, index) => (
-            <HotSpotInfo
-              hotspots={hotspots}
-              hotspotsClone={hotspotsClone}
-              setHotspots={setHotspots}
-              setFocusID={setFocusHotSpotID}
-              focusID={focusHotSpotID}
-              id={items.id}
-              key={index}
-            />
-          ))}
-          <div
-            className="add-hotspot"
-            onClick={() => {
-              if (hotspots.length < 6) {
-                hotspotsClone.push({
-                  hotspotName: "Hotspot",
-                  options: ["option1", "option2", "option3"],
-                  id: getRandomInt(0, 500),
-                  defaultColor: [0, 0, 0, 0],
-                  focusColor: [0, 0, 0, 0],
-                  defaultMask: "",
-                  focusMask: "",
-                });
-                setHotspots(hotspotsClone);
-                console.log("add!");
-              }
-            }}
-          >
-            +
-          </div>
-        </div>
-      </div>
+      </>
+    );
+  }
+  if (appState == 4) {
+    return (
+      <InteractiveVSD
+        hotspots={hotspots}
+        hotspotsImage={hotspotImage}
+        setAppState={setAppState}
+        focusID={focusHotSpotID}
+        setFocusID={setFocusHotSpotID}
+      />
     );
   }
 }

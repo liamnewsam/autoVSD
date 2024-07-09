@@ -20,4 +20,17 @@ export function myHotspot(id: number, hotspots: Hotspot[]) {
   return index >= 0 ? hotspots[index] : null;
 }
 
+export function arrayToRgba(arr: number[], transparency: boolean): string {
+  if (arr.length !== 4) {
+    throw new Error("Array must have exactly four elements.");
+  }
+  let [r, g, b, a] = arr;
+  if (transparency) {
+    a = (a * 1.0) / 255;
+  } else {
+    a = 1;
+  }
+
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
 export default myHotspot;

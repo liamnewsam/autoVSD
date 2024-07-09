@@ -1,0 +1,13 @@
+
+#menu-div {
+    background-color: rgb(116, 116, 116);
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+
+.menu-buttons {
+    background-color: rgb(192, 192, 255);
+    border: none;
+}
