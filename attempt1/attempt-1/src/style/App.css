@@ -37,6 +37,8 @@
 #image-container {
   flex: 3;
   background-color: antiquewhite;
+  padding-top: 5px;
+  padding-bottom: 5px
 }
 
 #editor-container {

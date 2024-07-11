@@ -1,6 +1,10 @@
 #VSD-image-div {
-    display: grid;
-    grid-template-rows: 80% 20%;
+    /*display: grid;
+    grid-template-rows: 80% 20%;*/
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: black;
+
 }
 
 #VSD-image {
@@ -8,10 +12,13 @@
     width: 100%;
     height: 100%;
     position: relative;
+
+
 }
 
 #VSD-options-div {
     padding: 20px;
+
 }
 
 #VSD-options {
@@ -19,6 +26,7 @@
     background-color: gray;
     width: 100%;
     height: 100%;
+
 }
 
 .vsd-option{
@@ -29,6 +37,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 20px;
+    
     /*margin-left: 10px;
     margin-right: 10px;*/
 }
@@ -44,5 +53,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
 
+    border-radius: 10px;
+    overflow: hidden;
 }
 

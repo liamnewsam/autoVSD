@@ -92,7 +92,7 @@ let colors: [defaultColor: RGB, focusColor: RGB][] = [
     [255, 171, 145],
   ], // Light Deep Orange
 ];
-colors = shuffle(colors);
+let colorsCopy: [defaultColor: RGB, focusColor: RGB][];
 
 function App() {
   // App State:
@@ -129,7 +129,7 @@ function App() {
             hotspotName: datum.hotspotName,
             options: datum.options,
             id: crypto.randomUUID(),
-            color: colors.pop(),
+            color: colorsCopy.pop(),
             outlinePoints: [],
           })
         )
@@ -156,6 +156,8 @@ function App() {
       setHotspotImage("");
       setHotspots([]);
       setFocusHotSpotID("");
+      colorsCopy = [...colors];
+      colorsCopy = shuffle(colorsCopy);
     }
 
     if (appState == 4) {
@@ -241,7 +243,7 @@ function App() {
                     hotspotName: "Hotspot",
                     options: ["option1", "option2", "option3"],
                     id: crypto.randomUUID(),
-                    color: colors.pop() || [
+                    color: colorsCopy.pop() || [
                       [0, 0, 0],
                       [0, 0, 0],
                     ],

@@ -10,7 +10,9 @@ function HotspotMenu({ setAppState }: MenuData) {
       <button className="hotspot-menu-button" onClick={() => setAppState(4)}>
         Send VSD
       </button>
-      <button className="hotspot-menu-button">New VSD</button>
+      <button className="hotspot-menu-button" onClick={() => setAppState(1)}>
+        New VSD
+      </button>
       <button className="hotspot-menu-button">Archive</button>
     </div>
   );

@@ -216,12 +216,12 @@ function VSDImage({
     maxWidth: "100%",
     maxHeight: "100%",
     backgroundImage: `url(${hotspotsImage})`,
-  };
+  }; /*
   const optionStyle: React.CSSProperties = {
     marginLeft: marginSize + "px",
     marginRight: marginSize + "px",
     width: optionWidth,
-  };
+  };*/
 
   if (vsdMode == 3) {
     return (
@@ -236,6 +236,7 @@ function VSDImage({
             className="canvas"
           />
         </div>
+        {/*
         <div id="VSD-options-div">
           <div id="VSD-options">
             {focusedHotspot
@@ -246,7 +247,7 @@ function VSDImage({
                 ))
               : null}
           </div>
-        </div>
+        </div>*/}
       </div>
     );
   }

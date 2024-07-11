@@ -152,39 +152,6 @@ function ImageDraw({
     }
   };
 
-  const bakeOutlines = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const context = canvas.getContext("2d");
-    if (!context) return;
-
-    for (let hs of hotspotsClone) {
-      clearCanvas();
-
-      context.strokeStyle = arrayToRgba([255, 0, 0, 0], false);
-      context.lineWidth = outlineThickness;
-      context.lineCap = "round";
-      context.lineJoin = "round";
-
-      context.beginPath();
-      context.moveTo(hs.outlinePoints[0].x, hs.outlinePoints[0].y);
-      for (let i = 1; i < hs.outlinePoints.length; i++) {
-        let point = hs.outlinePoints[i];
-        context.lineTo(point.x, point.y);
-      }
-      //context.closePath();
-      context.stroke();
-      context.fill();
-
-      hs.mask = canvas.toDataURL("image/png");
-    }
-    console.log("are we getting here?");
-    setHotspots(hotspotsClone);
-    clearCanvas();
-    drawOutlines();
-  };
-
   useEffect(() => {
     clearCanvas();
     drawOutlines();

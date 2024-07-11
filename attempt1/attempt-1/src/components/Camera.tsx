@@ -108,9 +108,11 @@ function Camera({ setHotspotImage }: CameraProps) {
   return (
     <div id="camera-canvas-container">
       <video id="video" />
-      <button id="start-button" onClick={() => takePicture()}>
-        H
-      </button>
+      <div id="start-button-ring">
+        <button id="start-button" onClick={() => takePicture()}>
+          H
+        </button>
+      </div>
       <button id="upload-button" onClick={handleButtonClick}>
         Upload Image
       </button>

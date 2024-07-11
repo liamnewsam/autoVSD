@@ -10,10 +10,10 @@ function VSDMenu({ setAppState }: VSDMenuData) {
 
   return (
     <div id="menu-div">
-      <button className="menu-buttons" onClick={() => setAppState(1)}>
+      <button className="menu-button" onClick={() => setAppState(1)}>
         New VSD
       </button>
-      <button className="menu-buttons">Archive</button>
+      <button className="menu-button">Archive</button>
     </div>
   );
 }

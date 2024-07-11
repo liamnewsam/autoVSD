@@ -4,10 +4,13 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
+    padding: 5px;
 }
 
 
-.menu-buttons {
+.menu-button {
     background-color: rgb(192, 192, 255);
     border: none;
+    border-radius: 5px;
+    
 }
