@@ -9,6 +9,7 @@ import ImageDraw from "./ImageDraw.tsx";
 import Camera from "./Camera.tsx";
 import HotspotMenu from "./HotspotMenu.tsx";
 import Hotspot from "./interfaces.tsx";
+import { RGB } from "./interfaces.tsx";
 import InteractiveVSD from "./InteractiveVSD.tsx";
 import { getRandomInt } from "./functions.tsx";
 import LoadingOverlay from "./LoadingOverlay.tsx";
@@ -16,6 +17,82 @@ import LoadingOverlay from "./LoadingOverlay.tsx";
 import sampleVSDData from "../assets/sampleVSD.json";
 
 //import imageObject from "../assets/ex1.png";
+
+export function shuffle<T>(array: T[]): T[] {
+  let currentIndex = array.length,
+    randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+}
+
+let colors: [defaultColor: RGB, focusColor: RGB][] = [
+  [
+    [255, 235, 238],
+    [255, 205, 210],
+  ], // Light Pink
+  [
+    [248, 187, 208],
+    [244, 143, 177],
+  ], // Light Pink 2
+  [
+    [209, 196, 233],
+    [179, 157, 219],
+  ], // Light Purple
+  [
+    [197, 202, 233],
+    [159, 168, 218],
+  ], // Light Indigo
+  [
+    [187, 222, 251],
+    [144, 202, 249],
+  ], // Light Blue
+  [
+    [179, 229, 252],
+    [129, 212, 250],
+  ], // Light Sky Blue
+  [
+    [178, 235, 242],
+    [128, 222, 234],
+  ], // Light Cyan
+  [
+    [178, 223, 219],
+    [128, 203, 196],
+  ], // Light Teal
+  [
+    [197, 225, 165],
+    [174, 213, 129],
+  ], // Light Green
+  [
+    [230, 238, 156],
+    [220, 231, 117],
+  ], // Light Lime
+  [
+    [255, 245, 157],
+    [255, 241, 118],
+  ], // Light Yellow
+  [
+    [255, 224, 178],
+    [255, 204, 128],
+  ], // Light Orange
+  [
+    [255, 204, 188],
+    [255, 171, 145],
+  ], // Light Deep Orange
+];
+colors = shuffle(colors);
 
 function App() {
   // App State:
@@ -48,16 +125,16 @@ function App() {
       const responseData = await response.json();
       setHotspots(
         responseData.map(
-          (datum: { hotspotName: string; options: string[] }) => ({
+          (datum: { hotspotName: string; options: string[] }, i: number) => ({
             hotspotName: datum.hotspotName,
             options: datum.options,
             id: crypto.randomUUID(),
-            defaultColor: [50, 50, 50, 50],
-            focusColor: [200, 200, 200, 0],
+            color: colors.pop(),
             outlinePoints: [],
           })
         )
       ); // Set response data in state
+      colors = colors.slice(hotspots.length);
       setAppState(3);
     } catch (error) {
       console.error("Error sending data:", error);
@@ -164,8 +241,10 @@ function App() {
                     hotspotName: "Hotspot",
                     options: ["option1", "option2", "option3"],
                     id: crypto.randomUUID(),
-                    defaultColor: [0, 0, 0, 0],
-                    focusColor: [0, 0, 0, 0],
+                    color: colors.pop() || [
+                      [0, 0, 0],
+                      [0, 0, 0],
+                    ],
                     outlinePoints: [],
                   });
                   setHotspots(hotspotsClone);
@@ -184,10 +263,12 @@ function App() {
     return (
       <InteractiveVSD
         hotspots={hotspots}
+        hotspotsClone={hotspotsClone}
         hotspotsImage={hotspotImage}
         setAppState={setAppState}
         focusID={focusHotSpotID}
         setFocusID={setFocusHotSpotID}
+        setHotspots={setHotspots}
       />
     );
   }

@@ -1,10 +1,8 @@
 import { useRef, useEffect, useState } from "react";
-import { Simplify, ISimplifyObjectPoint } from "simplify-ts";
-
 import "../style/ImageDraw.css";
 
 import Hotspot from "./interfaces.tsx";
-import { indexOf, myHotspot, arrayToRgba } from "./functions.tsx";
+import { indexOf, myHotspot, arrayToRgba, arrayToRGB } from "./functions.tsx";
 
 interface ImageDrawProps {
   hotspotImage: string;
@@ -12,6 +10,62 @@ interface ImageDrawProps {
   hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
   focusID: string;
+}
+interface Point {
+  x: number;
+  y: number;
+}
+
+const outlineThickness = 4;
+
+function chaikinSmooth(points: Point[], iterations: number = 5): Point[] {
+  if (points.length < 3) return points; // No need to smooth if there are less than 3 points
+
+  const smoothPoints = (pts: Point[]): Point[] => {
+    let newPoints: Point[] = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i];
+      const p1 = pts[i + 1];
+      const Q = { x: 0.75 * p0.x + 0.25 * p1.x, y: 0.75 * p0.y + 0.25 * p1.y };
+      const R = { x: 0.25 * p0.x + 0.75 * p1.x, y: 0.25 * p0.y + 0.75 * p1.y };
+      newPoints.push(Q, R);
+    }
+    // Handle closing the shape by connecting the last point to the first point
+    const firstPoint = pts[0];
+    const lastPoint = pts[pts.length - 1];
+    const Q = {
+      x: 0.75 * lastPoint.x + 0.25 * firstPoint.x,
+      y: 0.75 * lastPoint.y + 0.25 * firstPoint.y,
+    };
+    const R = {
+      x: 0.25 * lastPoint.x + 0.75 * firstPoint.x,
+      y: 0.25 * lastPoint.y + 0.75 * firstPoint.y,
+    };
+    newPoints.push(Q, R);
+    newPoints.push(newPoints[0]); // Ensure the shape is closed
+    return newPoints;
+  };
+
+  let smoothedPoints = points;
+  for (let i = 0; i < iterations; i++) {
+    smoothedPoints = smoothPoints(smoothedPoints);
+  }
+  return smoothedPoints;
+}
+
+function decreasePointDensity(
+  points: { x: number; y: number }[],
+  factor: number
+) {
+  if (factor <= 1) {
+    return points; // Factor of 1 or less means no reduction
+  }
+
+  const reducedPoints = [];
+  for (let i = 0; i < points.length; i += factor) {
+    reducedPoints.push(points[i]);
+  }
+  return reducedPoints;
 }
 
 function ImageDraw({
@@ -44,21 +98,14 @@ function ImageDraw({
   let backgroundImage = new Image();
   useEffect(() => {
     backgroundImage.src = hotspotImage;
-    calculateCanvasSize(backgroundImage.width, backgroundImage.height);
-    console.log("hi");
+    backgroundImage.onload = () => {
+      calculateCanvasSize(backgroundImage.width, backgroundImage.height);
+    };
   }, [hotspotImage]);
-  /*
-  let backgroundImage = new Image();
-  backgroundImage.onload = () => {
-    calculateCanvasSize(backgroundImage.width, backgroundImage.height);
-    drawMasks();
-  };
-  backgroundImage.src = hotspotImage;*/
-
-  //This is because I don't know how to get masks to be drawn when they first get loaded into hotspots.
 
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [drawingData, setDrawingData] = useState<any[]>([]); // State to hold drawing data
+  const [readyToDraw, setReadyToDraw] = useState(false);
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;
@@ -67,9 +114,7 @@ function ImageDraw({
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    //console.log("we do be clearing!");
     context.clearRect(0, 0, canvas.width, canvas.height);
-    //setDrawingData(() => []);
   };
 
   const drawOutlines = (exclude: string[] = []) => {
@@ -79,53 +124,87 @@ function ImageDraw({
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    context.strokeStyle = "black";
-    context.lineWidth = 2;
+    context.lineWidth = outlineThickness;
     context.lineCap = "round";
     context.lineJoin = "round";
-    context.fillStyle = "rgba(50, 50, 50, 0.2)";
+
+    clearCanvas();
 
     for (let hotspot of hotspots) {
       if (exclude.indexOf(hotspot.id) > -1) {
-        console.log("Alright we are excluding: ", hotspot.id);
         continue;
       }
-      //console.log(hotspot.focusMask);
-      if (hotspot.outlinePoints.length < 1) continue;
+      if (hotspot.outlinePoints.length < 3) continue;
 
-      console.log("at least we are in here!");
-      //context.beginPath();
+      context.strokeStyle = arrayToRGB(
+        hotspot.id == focusID ? hotspot.color[1] : hotspot.color[0]
+      );
+
+      context.beginPath();
       context.moveTo(hotspot.outlinePoints[0].x, hotspot.outlinePoints[0].y);
       for (let i = 1; i < hotspot.outlinePoints.length; i++) {
         let point = hotspot.outlinePoints[i];
         context.lineTo(point.x, point.y);
-        context.stroke();
       }
       //context.closePath();
+      context.stroke();
+      //context.fill();
     }
   };
-  /*
-  useEffect(() => {
-    if (drawingData.length > 0) {
-      drawMask();
-    }
-  }, [drawingData]);*/
 
-  useEffect(() => {
-    //console.log("we should be drawing cuz focusID updated!");
+  const bakeOutlines = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    for (let hs of hotspotsClone) {
+      clearCanvas();
+
+      context.strokeStyle = arrayToRgba([255, 0, 0, 0], false);
+      context.lineWidth = outlineThickness;
+      context.lineCap = "round";
+      context.lineJoin = "round";
+
+      context.beginPath();
+      context.moveTo(hs.outlinePoints[0].x, hs.outlinePoints[0].y);
+      for (let i = 1; i < hs.outlinePoints.length; i++) {
+        let point = hs.outlinePoints[i];
+        context.lineTo(point.x, point.y);
+      }
+      //context.closePath();
+      context.stroke();
+      context.fill();
+
+      hs.mask = canvas.toDataURL("image/png");
+    }
+    console.log("are we getting here?");
+    setHotspots(hotspotsClone);
     clearCanvas();
     drawOutlines();
-    console.log("currently focused ID is:", focusID);
+  };
+
+  useEffect(() => {
+    clearCanvas();
+    drawOutlines();
   }, [focusID]);
 
   useEffect(() => {
     if (focusedHotspot && drawingData.length > 0) {
-      console.log("YESirrrrrrrrr");
       focusedHotspot.outlinePoints = drawingData;
       setHotspots(hotspotsClone);
       setDrawingData([]);
+      setReadyToDraw(true);
     }
   }, [drawingData]);
+
+  useEffect(() => {
+    if (readyToDraw) {
+      drawOutlines();
+      setReadyToDraw(false);
+    }
+  }, [readyToDraw]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -134,28 +213,22 @@ function ImageDraw({
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    context.strokeStyle = "black";
-    context.lineWidth = 2;
+    if (!focusedHotspot) return;
+    context.strokeStyle = arrayToRGB(focusedHotspot.color[1]);
+    context.lineWidth = outlineThickness;
     context.lineCap = "round";
     context.lineJoin = "round";
-    context.fillStyle = "rgba(50, 50, 50, 0.2)";
+    //context.fillStyle = "rgba(50, 50, 50, 0.2)";
 
     let currentDrawingData: any[] = [];
-    console.log("AM I Drawing???: ", isDrawing);
-    console.log("What is Focus?: ", focusID);
-
-    if (isDrawing) {
-      clearCanvas();
-      drawOutlines([focusID]);
-    }
 
     const startDrawing = (event: TouchEvent) => {
       setIsDrawing(true);
-      console.log("we should be excluding focusID...", focusID);
 
-      console.log("lets a go!");
+      clearCanvas();
+      drawOutlines([focusID]);
       const { offsetX, offsetY } = getMousePosition(canvas, event);
-      //context.beginPath();
+      context.beginPath();
       context.moveTo(offsetX, offsetY);
 
       currentDrawingData.push({ x: offsetX, y: offsetY });
@@ -165,7 +238,6 @@ function ImageDraw({
       if (!isDrawing) return;
 
       const { offsetX, offsetY } = getMousePosition(canvas, event);
-      //console.log(offsetX, offsetY);
       context.lineTo(offsetX, offsetY);
       context.stroke();
 
@@ -173,11 +245,11 @@ function ImageDraw({
     };
 
     const finishDrawing = () => {
-      console.log("phew");
-      //context.closePath();
       setIsDrawing(false);
-
-      setDrawingData(currentDrawingData);
+      //context.closePath();
+      setDrawingData(
+        chaikinSmooth(decreasePointDensity(currentDrawingData, 5))
+      );
     };
 
     canvas.addEventListener("touchstart", startDrawing);
@@ -191,7 +263,7 @@ function ImageDraw({
       canvas.removeEventListener("touchend", finishDrawing);
       canvas.removeEventListener("touchcancel", finishDrawing);
     };
-  }, [isDrawing]);
+  }, [isDrawing, focusID]);
 
   const getMousePosition = (canvas: HTMLCanvasElement, event: TouchEvent) => {
     const rect = canvas.getBoundingClientRect();
@@ -203,8 +275,6 @@ function ImageDraw({
   };
 
   const style: React.CSSProperties = {
-    //width: "100%",
-    //height: "100%",
     maxWidth: "100%",
     maxHeight: "100%",
     backgroundImage: `url(${hotspotImage})`,
@@ -218,7 +288,7 @@ function ImageDraw({
         height={canvasDimensions[1]}
         style={style}
         className={
-          "canvas" + (indexOf(focusID, hotspots) != -1 ? "" : " empty")
+          "canvas" + (indexOf(focusID, hotspots) !== -1 ? "" : " empty")
         }
         id="canvas"
       />

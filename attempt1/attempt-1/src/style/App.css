@@ -5,10 +5,14 @@
 }
 
 #camera-container {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100vh;
-  padding: 10px;
-  position: relative;
+  background-color: rgb(70, 70, 70);
+  /*
+  display: flex;
+  justify-content: center;*/
 }
 
 #left-half {

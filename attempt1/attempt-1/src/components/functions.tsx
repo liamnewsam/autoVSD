@@ -33,4 +33,9 @@ export function arrayToRgba(arr: number[], transparency: boolean): string {
 
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
+
+export function arrayToRGB(arr: number[]) {
+  let [r, g, b] = arr;
+  return `rgb(${r}, ${g}, ${b})`;
+}
 export default myHotspot;

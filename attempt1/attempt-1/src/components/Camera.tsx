@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import "../style/Camera.css";
 
 interface CameraProps {
@@ -12,6 +14,7 @@ function Camera({ setHotspotImage }: CameraProps) {
 
   let video: HTMLVideoElement;
   let canvas: HTMLCanvasElement;
+  let div: HTMLDivElement;
   //let photo: HTMLImageElement;
 
   navigator.mediaDevices
@@ -19,18 +22,35 @@ function Camera({ setHotspotImage }: CameraProps) {
     .then((mediaStream) => {
       video = document.getElementById("video") as HTMLVideoElement;
       canvas = document.getElementById("camera-canvas") as HTMLCanvasElement;
+      div = document.getElementById(
+        "camera-canvas-container"
+      ) as HTMLDivElement;
       //photo = document.getElementById("photo") as HTMLImageElement;
-      if (video === null || canvas === null) return;
+      if (video === null || canvas === null || div === null) return;
       video.srcObject = mediaStream;
       video.onloadedmetadata = () => {
-        video.setAttribute("width", "100%");
-        video.setAttribute("height", "100%");
-        video.setAttribute("maxWidth", "100%");
-        video.setAttribute("maxHeight", "100%");
+        const videoAspectRatio = video.videoWidth / video.videoHeight;
 
-        canvas.setAttribute("width", video.videoWidth + "px");
-        canvas.setAttribute("height", video.videoHeight + "px");
+        // Determine the max width and height based on viewport dimensions
+        const maxWidth = window.innerWidth * 0.9;
+        const maxHeight = window.innerHeight * 0.9;
+        const containerAspectRatio = maxWidth / maxHeight;
 
+        if (containerAspectRatio > videoAspectRatio) {
+          div.style.width = maxHeight * videoAspectRatio + "px";
+          div.style.height = maxHeight + "px";
+        } else {
+          div.style.width = maxWidth + "px";
+          div.style.height = maxWidth / videoAspectRatio + "px";
+        }
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        console.log("Video metadata loaded:", {
+          videoWidth: video.videoWidth,
+          videoHeight: video.videoHeight,
+        });
         //streaming = true;
         video.play();
       };
@@ -63,14 +83,46 @@ function Camera({ setHotspotImage }: CameraProps) {
   }
   //
 
+  const fileInputRef = useRef<HTMLInputElement>(null); // Specify the type explicitly
+
+  const handleButtonClick = () => {
+    // Check if fileInputRef.current is not null before calling click()
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Now TypeScript knows fileInputRef.current is an HTMLInputElement
+    }
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        console.log("Data URL:", dataUrl);
+        // Example: You could use dataUrl in further processing or upload to server
+        setHotspotImage(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   return (
-    <>
+    <div id="camera-canvas-container">
       <video id="video" />
       <button id="start-button" onClick={() => takePicture()}>
         H
       </button>
+      <button id="upload-button" onClick={handleButtonClick}>
+        Upload Image
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleFileChange}
+        accept="image/*"
+        id="file-input"
+      />
       <canvas id="camera-canvas" />
-    </>
+    </div>
   );
 }
 
