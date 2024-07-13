@@ -7,15 +7,9 @@ interface CameraProps {
 }
 
 function Camera({ setHotspotImage }: CameraProps) {
-  // |streaming| indicates whether or not we're currently streaming
-  // video from the camera. Obviously, we start at false.
-
-  //let streaming = false;
-
   let video: HTMLVideoElement;
   let canvas: HTMLCanvasElement;
   let div: HTMLDivElement;
-  //let photo: HTMLImageElement;
 
   navigator.mediaDevices
     .getUserMedia({ video: true })
@@ -25,13 +19,12 @@ function Camera({ setHotspotImage }: CameraProps) {
       div = document.getElementById(
         "camera-canvas-container"
       ) as HTMLDivElement;
-      //photo = document.getElementById("photo") as HTMLImageElement;
+
       if (video === null || canvas === null || div === null) return;
+
       video.srcObject = mediaStream;
       video.onloadedmetadata = () => {
         const videoAspectRatio = video.videoWidth / video.videoHeight;
-
-        // Determine the max width and height based on viewport dimensions
         const maxWidth = window.innerWidth * 0.9;
         const maxHeight = window.innerHeight * 0.9;
         const containerAspectRatio = maxWidth / maxHeight;
@@ -47,31 +40,20 @@ function Camera({ setHotspotImage }: CameraProps) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
-        console.log("Video metadata loaded:", {
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-        });
-        //streaming = true;
         video.play();
       };
     })
     .catch((err) => {
-      // always check for errors at the end.
       console.error(`${err.name}: ${err.message}`);
     });
 
-  // Fill the photo with an indication that none has been
-  // captured.
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /*function clearphoto() {
-    setHotspotImage("");
-  }*/
-
-  // Capture a photo by fetching the current contents of the video
-  // and drawing it into a canvas, then converting that to a PNG
-  // format data URL. By drawing it on an offscreen canvas and then
-  // drawing that to the screen, we can change its size and/or apply
-  // other changes before drawing it.
+  const handleButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
   function takePicture() {
     const context = canvas.getContext("2d");
@@ -81,30 +63,32 @@ function Camera({ setHotspotImage }: CameraProps) {
     const data = canvas.toDataURL("image/png");
     setHotspotImage(data);
   }
-  //
-
-  const fileInputRef = useRef<HTMLInputElement>(null); // Specify the type explicitly
-
-  const handleButtonClick = () => {
-    // Check if fileInputRef.current is not null before calling click()
-    if (fileInputRef.current) {
-      fileInputRef.current.click(); // Now TypeScript knows fileInputRef.current is an HTMLInputElement
-    }
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
-        console.log("Data URL:", dataUrl);
-        // Example: You could use dataUrl in further processing or upload to server
-        setHotspotImage(dataUrl);
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          const img = new Image();
+          img.onload = () => {
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            const ctx = tempCanvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, img.width, img.height);
+
+              setHotspotImage(tempCanvas.toDataURL("image/png"));
+            }
+          };
+          img.src = e.target.result.toString();
+        }
       };
       reader.readAsDataURL(file);
     }
   };
+
   return (
     <div id="camera-canvas-container">
       <video id="video" />

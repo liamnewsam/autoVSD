@@ -1,6 +1,11 @@
+@import "variables.css";
+
 #camera-canvas-container {
     position: relative;
-    background-color: red;
+    background-color: var(--background-color);
+    border-width: 5px;
+    border-color: black;
+    border-style: solid;
     border-radius: 20px;
     overflow: hidden;
     width: 90vw; /* Max width based on viewport */
@@ -58,7 +63,7 @@
     bottom:2%;
     left:2%;
 
-    background-color: #04AA6D; /* Green */
+    background-color: var(--primary-color); /* Green */
     border: none;
     color: white;
     padding: 15px 32px;

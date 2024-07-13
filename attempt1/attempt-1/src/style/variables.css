@@ -1,0 +1,47 @@
+:root {
+    /* Color Palette */
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --accent-color: #e74c3c;
+    --background-color: #ffffff;
+    --background-dark-1-color: #f4f4f4;
+    --background-dark-2-color: rgb(218, 218, 218);
+    --border-color: #dddddd;
+  
+    /* Text Colors */
+    --text-color: #333333;
+    --text-light-color: #666666;
+    --text-dark-color: #111111;
+  
+    /* Font Sizes */
+    --font-size-small: 12px;
+    --font-size-medium: 16px;
+    --font-size-large: 20px;
+    --font-size-xlarge: 24px;
+  
+    /* Spacing */
+    --spacing-small: 8px;
+    --spacing-medium: 16px;
+    --spacing-large: 24px;
+    --spacing-xlarge: 32px;
+  
+    /* Border Radius */
+    --border-radius-small: 4px;
+    --border-radius-medium: 8px;
+    --border-radius-large: 12px;
+  
+    /* Box Shadows */
+    --box-shadow-small: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --box-shadow-medium: 0 3px 6px rgba(0, 0, 0, 0.15);
+    --box-shadow-large: 0 5px 15px rgba(0, 0, 0, 0.2);
+  
+    /* Transitions */
+    --transition-fast: 0.2s;
+    --transition-medium: 0.4s;
+    --transition-slow: 0.6s;
+  
+    /* Font Families */
+    --font-family-sans: 'Helvetica Neue', Arial, sans-serif;
+    --font-family-serif: 'Georgia', Times, 'Times New Roman', serif;
+    --font-family-mono: 'Courier New', Courier, monospace;
+  }

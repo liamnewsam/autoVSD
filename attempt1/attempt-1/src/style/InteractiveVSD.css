@@ -1,3 +1,5 @@
+@import "variables.css";
+
 #VSD-div {
     display: grid;
     grid-template-rows: 10vh 90vh;
