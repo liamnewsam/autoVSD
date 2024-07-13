@@ -234,6 +234,7 @@ function VSDImage({
     setTimeout(() => {
       setTooltip((tooltip) => ({ ...tooltip, visible: false }));
       tooltipVisibleRef.current = false;
+      setFocusID("");
       console.log("Tooltip has been hidden");
     }, 1000);
 

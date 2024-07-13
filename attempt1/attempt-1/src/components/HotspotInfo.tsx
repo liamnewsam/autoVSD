@@ -27,10 +27,12 @@ function HotSpotInfo({
   if (hs) {
     return (
       <div
-        className={"hotSpotInfo" + (id === focusID ? " info-focus" : "")}
+        className={
+          "hotSpotInfo" + (hs.outlinePoints.length > 0 ? " has-mask" : "")
+        }
         onClick={() => setFocusID(id)}
         style={{
-          backgroundColor:
+          borderColor:
             id === focusID ? arrayToRGB(hs.color[1]) : arrayToRGB(hs.color[0]),
         }}
       >

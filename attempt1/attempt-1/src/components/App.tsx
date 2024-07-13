@@ -203,18 +203,18 @@ function App() {
         {appState == 2 && <LoadingOverlay />}
         <div id="container">
           <div id="left-half">
-            <div id="image-container">
-              <ImageDraw
-                //hotspotImage={hotspotImage}
-                hotspotImage={hotspotImage}
+            <div id="editor-container">
+              <Editor
                 hotspots={hotspots}
                 hotspotsClone={hotspotsClone}
                 setHotspots={setHotspots}
                 focusID={focusHotSpotID}
               />
             </div>
-            <div id="editor-container">
-              <Editor
+            <div id="image-container">
+              <ImageDraw
+                //hotspotImage={hotspotImage}
+                hotspotImage={hotspotImage}
                 hotspots={hotspots}
                 hotspotsClone={hotspotsClone}
                 setHotspots={setHotspots}

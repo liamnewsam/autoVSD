@@ -2,10 +2,11 @@
     /* Color Palette */
     --primary-color: #3498db;
     --secondary-color: #2ecc71;
+    --third-color: rgb(255, 238, 238);
     --accent-color: #e74c3c;
     --background-color: #ffffff;
     --background-dark-1-color: #f4f4f4;
-    --background-dark-2-color: rgb(218, 218, 218);
+    --background-dark-2-color: rgb(226, 226, 226);
     --border-color: #dddddd;
   
     /* Text Colors */

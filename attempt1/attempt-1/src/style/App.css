@@ -19,10 +19,11 @@
 }
 
 #left-half {
-  background-color: var(--background-dark-2-color);
+  background-color: var(--background-dark-1-color);
+  /*background-color: var(--primary-color);*/
 
   display: grid;
-  grid-template-rows: 50vh 40vh 10vh;
+  grid-template-rows: 40vh 50vh 10vh;
 
   flex: 1;
 }
@@ -49,7 +50,6 @@
 }
 
 #hotspot-menu-container {
-  background-color: var(--background-dark-1-color);
   padding: 10px;
 
 }

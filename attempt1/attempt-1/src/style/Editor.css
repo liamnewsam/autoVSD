@@ -8,7 +8,7 @@
 .editor-container {
     flex: 1;
 
-    background-color: #fff;
+    background-color: var(--background-color);
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -19,6 +19,7 @@
 .editor-hotspot-name {
     font-size: 1.5em;
     margin-bottom: 10px;
+    color: var(--text-dark-color);
 }
 
 .editor-options {
@@ -28,18 +29,20 @@
 }
 
 .editor-option {
-    background-color: #eee;
+    background-color: var(--background-dark-1-color);
     border-radius: 4px;
     margin: 5px;
     padding: 5px 10px;
     height: var(--option-box-size);
+    color: var(--text-dark-color);
+
 
     
 }
 
 .editor-input {
     border: none;
-    border-bottom: 2px solid red;
+    border-bottom: 2px solid var(--border-color);
     background-color: transparent;
 }
 
@@ -65,7 +68,7 @@
 }
 
 .delete-button {
-    background-color: rgb(255, 184, 196);
+    background-color: var(--accent-color);
 
 }
 
@@ -74,5 +77,5 @@
 }
 
 .add-button {
-    background-color: #4CAF50;
+    background-color: var(--secondary-color);
 }
