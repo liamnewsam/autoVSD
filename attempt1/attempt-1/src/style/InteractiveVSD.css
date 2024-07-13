@@ -1,6 +1,7 @@
 @import "variables.css";
 
 #VSD-div {
+    height: 100vh;
     display: grid;
-    grid-template-rows: 10vh 90vh;
+    grid-template-columns: 85vw 15vw;
 }

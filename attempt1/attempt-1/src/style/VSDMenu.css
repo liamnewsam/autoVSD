@@ -1,17 +1,27 @@
 @import "variables.css";
 
 #menu-div {
-    background-color: rgb(116, 116, 116);
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    background-color: var(--background-dark-1-color);
+    display: flex;
+    flex-direction: column;
     gap: 5px;
     padding: 5px;
 }
 
-
 .menu-button {
-    background-color: rgb(192, 192, 255);
+    background-color: var(--background-color);
+    font-size: 1.4em;
+    text-align: center;
+    /*border: 1px solid #ddd;*/
     border: none;
-    border-radius: 5px;
-    
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    color: var(--text-light-color);
+
+}
+
+.accented-VSD-menu-button{
+    background-color: var(--primary-color);
+    color: white;
 }

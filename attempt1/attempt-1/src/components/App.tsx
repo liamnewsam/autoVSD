@@ -99,7 +99,8 @@ function App() {
   //              1 = taking photo
   //              2 = loading screen
   //              3 = editing hotspot
-  //              4 = final hotspot
+  //              4 = sending vsd
+  //              5 = final hotspot
 
   // Change these States into individual screen states, like CameraState, EditState, VSDState, and have them be boolean!
 
@@ -162,7 +163,7 @@ function App() {
       colorsCopy = shuffle(colorsCopy);
     }
 
-    if (appState == 4) {
+    if (appState == 5) {
       /*
       fetch("http://localhost:5000/api/send-VSD", {
         method: "POST",
@@ -264,6 +265,14 @@ function App() {
     );
   }
   if (appState == 4) {
+    setTimeout(() => {
+      setAppState(5);
+    }, 2000);
+    return (
+      <div className="sending-vsd-loading-screen">Sending VSD to User</div>
+    );
+  }
+  if (appState == 5) {
     return (
       <InteractiveVSD
         hotspots={hotspots}

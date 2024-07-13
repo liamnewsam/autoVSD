@@ -79,3 +79,15 @@
 .add-button {
     background-color: var(--secondary-color);
 }
+
+.empty-editor-text {
+    color: var(--text-light-color);
+    height: 100%;
+    /*text-align: center;*/
+    font-size: 2em;
+    
+    display: flex;
+    justify-content: center;  /* Center horizontally */
+    align-items: center;      /* Center vertically */
+}
+

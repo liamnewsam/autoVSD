@@ -8,7 +8,10 @@ interface VSDMenuData {
 function VSDMenu({ setAppState }: VSDMenuData) {
   return (
     <div id="menu-div">
-      <button className="menu-button" onClick={() => setAppState(1)}>
+      <button
+        className="menu-button accented-VSD-menu-button"
+        onClick={() => setAppState(1)}
+      >
         New VSD
       </button>
       <button className="menu-button">Archive</button>

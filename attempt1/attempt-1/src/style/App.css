@@ -53,3 +53,14 @@
   padding: 10px;
 
 }
+
+.sending-vsd-loading-screen {
+  height: 100vh;
+  color: var(--text-light-color);
+  /*text-align: center;*/
+  font-size: 2em;
+  background-color: var(--background-dark-1-color);
+  display: flex;
+  justify-content: center;  /* Center horizontally */
+  align-items: center;      /* Center vertically */
+}

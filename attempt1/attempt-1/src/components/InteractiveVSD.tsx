@@ -26,7 +26,6 @@ function InteractiveVSD({
   hotspots;
   return (
     <div id="VSD-div">
-      <VSDMenu setAppState={setAppState} />
       <VSDImage
         hotspotsImage={hotspotsImage}
         hotspots={hotspots}
@@ -36,6 +35,7 @@ function InteractiveVSD({
         setHotspots={setHotspots}
         vsdMode={3}
       />
+      <VSDMenu setAppState={setAppState} />
     </div>
   );
 }

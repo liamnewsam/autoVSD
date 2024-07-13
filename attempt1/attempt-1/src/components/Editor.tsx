@@ -73,6 +73,8 @@ function Editor({
         </ul>
       </div>
     );
+  } else {
+    return <div className="empty-editor-text">Select Hotspot To Edit</div>;
   }
 }
 
