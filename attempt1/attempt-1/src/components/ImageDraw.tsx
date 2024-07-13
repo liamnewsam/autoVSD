@@ -75,11 +75,15 @@ function ImageDraw({
   focusID,
 }: ImageDrawProps) {
   let hotspotsClone = structuredClone(hotspots);
+
   let focusedHotspot = myHotspot(focusID, hotspotsClone);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  let [canvasDimensions, setCanvasDimensions] = useState([0, 0]);
+  const [canvasDimensions, setCanvasDimensions] = useState([0, 0]);
+
+  const [imageDimensions, setImageDimensions] = useState<number[]>([0, 0]);
+
   const calculateCanvasSize = (imageW: number, imageH: number) => {
     let parent = document.getElementById("canvas-container");
     if (!parent) return;
@@ -98,10 +102,21 @@ function ImageDraw({
   let backgroundImage = new Image();
   useEffect(() => {
     backgroundImage.src = hotspotImage;
+
     backgroundImage.onload = () => {
       calculateCanvasSize(backgroundImage.width, backgroundImage.height);
+      setImageDimensions([backgroundImage.width, backgroundImage.height]);
     };
   }, [hotspotImage]);
+
+  /*
+  const [scalingFactor, setScalingFactor] = useState(0);
+  useEffect(() => {
+    if (canvasDimensions[0] && imageDimensions[0]) {
+      setScalingFactor((canvasDimensions[0] * 1.0) / imageDimensions[0]);
+    }
+  }, [canvasDimensions, imageDimensions]);*/
+  let scalingFactor = (canvasDimensions[0] * 1.0) / imageDimensions[0];
 
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [drawingData, setDrawingData] = useState<any[]>([]); // State to hold drawing data
@@ -141,14 +156,15 @@ function ImageDraw({
       );
 
       context.beginPath();
-      context.moveTo(hotspot.outlinePoints[0].x, hotspot.outlinePoints[0].y);
+      context.moveTo(
+        hotspot.outlinePoints[0].x * scalingFactor,
+        hotspot.outlinePoints[0].y * scalingFactor
+      );
       for (let i = 1; i < hotspot.outlinePoints.length; i++) {
         let point = hotspot.outlinePoints[i];
-        context.lineTo(point.x, point.y);
+        context.lineTo(point.x * scalingFactor, point.y * scalingFactor);
       }
-      //context.closePath();
       context.stroke();
-      //context.fill();
     }
   };
 
@@ -185,7 +201,6 @@ function ImageDraw({
     context.lineWidth = outlineThickness;
     context.lineCap = "round";
     context.lineJoin = "round";
-    //context.fillStyle = "rgba(50, 50, 50, 0.2)";
 
     let currentDrawingData: any[] = [];
 
@@ -198,7 +213,10 @@ function ImageDraw({
       context.beginPath();
       context.moveTo(offsetX, offsetY);
 
-      currentDrawingData.push({ x: offsetX, y: offsetY });
+      currentDrawingData.push({
+        x: offsetX / scalingFactor,
+        y: offsetY / scalingFactor,
+      });
     };
 
     const draw = (event: TouchEvent) => {
@@ -208,12 +226,14 @@ function ImageDraw({
       context.lineTo(offsetX, offsetY);
       context.stroke();
 
-      currentDrawingData.push({ x: offsetX, y: offsetY });
+      currentDrawingData.push({
+        x: offsetX / scalingFactor,
+        y: offsetY / scalingFactor,
+      });
     };
 
     const finishDrawing = () => {
       setIsDrawing(false);
-      //context.closePath();
       setDrawingData(
         chaikinSmooth(decreasePointDensity(currentDrawingData, 5))
       );

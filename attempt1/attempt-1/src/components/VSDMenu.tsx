@@ -6,8 +6,6 @@ interface VSDMenuData {
 }
 
 function VSDMenu({ setAppState }: VSDMenuData) {
-  console.log("at least we're working");
-
   return (
     <div id="menu-div">
       <button className="menu-button" onClick={() => setAppState(1)}>

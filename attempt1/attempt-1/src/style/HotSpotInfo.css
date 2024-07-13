@@ -21,6 +21,7 @@
 
 .option {
     background-color: #eee;
+    border: none;
     border-radius: 4px;
     margin: 5px;
     padding: 5px 10px;

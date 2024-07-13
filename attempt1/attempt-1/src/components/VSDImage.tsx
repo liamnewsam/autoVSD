@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import Hotspot from "./interfaces";
 import "../style/VSDImage.css";
 import { myHotspot } from "./functions";
-import { arrayToRGB, arrayToRgba } from "./functions";
+import { arrayToRGB } from "./functions";
 
 let marginSize = 10;
 let outlineThickness = 10;
@@ -26,31 +26,19 @@ function VSDImage({
   setHotspots,
   vsdMode,
 }: VSDImageData) {
-  /*
-              VSD Modes:
-                  1: Only speaks hotspot name
-                  2. Speaks hotspot name, shows options around hotspot
-                  3. Speaks hotspot name, shows options at bottom of the s
-    */
-
   let focusedHotspot = myHotspot(focusID, hotspots);
 
   let [canvasDimensions, setCanvasDimensions] = useState([0, 0]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  let [optionWidth, setOptionWidth] = useState(10);
-  useEffect(() => {
-    let maxOptions = 0;
-    for (let hotspot of hotspots) {
-      if (hotspot.options.length > maxOptions)
-        maxOptions = hotspot.options.length;
-    }
+  const [tooltip, setTooltip] = useState<{
+    visible: boolean;
+    text: string;
+    x: number;
+    y: number;
+  }>({ visible: false, text: "", x: 0, y: 0 });
 
-    let totalWidth = document.getElementById("VSD-options")?.clientWidth;
-    if (!totalWidth) return;
-    let availableWidth = totalWidth - maxOptions * marginSize * 2;
-    setOptionWidth(availableWidth / maxOptions);
-  }, [hotspots]);
+  const tooltipVisibleRef = useRef(false);
 
   const calculateCanvasSize = (imageW: number, imageH: number) => {
     let parent = document.getElementById("VSD-image");
@@ -67,55 +55,65 @@ function VSDImage({
     }
   };
 
+  let [imageDimensions, setImageDimensions] = useState<number[]>([0, 0]);
   let backgroundImage = new Image();
   useEffect(() => {
     backgroundImage.src = hotspotsImage;
     calculateCanvasSize(backgroundImage.width, backgroundImage.height);
+    setImageDimensions([backgroundImage.width, backgroundImage.height]);
   }, [hotspotsImage]);
 
-  let [hasBaked, setHasBaked] = useState(false);
-  useEffect(() => {
-    if (!hasBaked) {
-      console.log("we are fucking screwed");
+  let scalingFactor = (canvasDimensions[0] * 1.0) / imageDimensions[0];
 
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const context = canvas.getContext("2d");
-      if (!context) return;
-
-      for (let hs of hotspots) {
-        if (hs.outlinePoints.length == 0) continue;
-
-        clearCanvas();
-
-        context.strokeStyle = arrayToRgba([255, 0, 0, 0], false);
-        context.lineWidth = outlineThickness;
-        context.lineCap = "round";
-        context.lineJoin = "round";
-
-        context.beginPath();
-        context.moveTo(hs.outlinePoints[0].x, hs.outlinePoints[0].y);
-        for (let i = 1; i < hs.outlinePoints.length; i++) {
-          let point = hs.outlinePoints[i];
-          context.lineTo(point.x, point.y);
-        }
-        //context.closePath();
-        context.stroke();
-        context.fill();
-
-        console.log("are we getting here?");
-
-        //hs.mask = canvas.toDataURL("image/png");
-        hs.mask = "HI";
-        setHotspots(hotspotsClone);
-      }
-      clearCanvas();
-      drawOutlines();
-
-      setHasBaked(true);
+  const bakeMasks = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.log("Canvas not found");
+      return;
     }
-  }, [hasBaked]);
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      console.log("Context not found");
+      return;
+    }
+
+    for (let hs of hotspotsClone) {
+      if (hs.outlinePoints.length == 0) continue;
+
+      clearCanvas();
+
+      context.strokeStyle = "rgba(255, 0, 0, 1)";
+      context.lineWidth = outlineThickness;
+      context.lineCap = "round";
+      context.lineJoin = "round";
+      context.fillStyle = "rgba(255, 0, 0, 1)";
+
+      context.beginPath();
+      context.moveTo(
+        hs.outlinePoints[0].x * scalingFactor,
+        hs.outlinePoints[0].y * scalingFactor
+      );
+
+      for (let i = 1; i < hs.outlinePoints.length; i++) {
+        let point = hs.outlinePoints[i];
+        context.lineTo(point.x * scalingFactor, point.y * scalingFactor);
+      }
+      context.stroke();
+      context.fill();
+
+      hs.mask = canvas.toDataURL("image/png");
+    }
+
+    setHotspots(hotspotsClone);
+    clearCanvas();
+  };
+
+  useEffect(() => {
+    console.log("Canvas dimensions changed");
+    bakeMasks();
+    drawOutlines();
+  }, [canvasDimensions]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -137,6 +135,7 @@ function VSDImage({
     if (!context) return;
 
     context.clearRect(0, 0, canvas.width, canvas.height);
+    console.log("Canvas cleared");
   };
 
   const drawOutlines = (exclude: string[] = []) => {
@@ -163,31 +162,39 @@ function VSDImage({
       );
 
       context.beginPath();
-      context.moveTo(hotspot.outlinePoints[0].x, hotspot.outlinePoints[0].y);
+      context.moveTo(
+        hotspot.outlinePoints[0].x * scalingFactor,
+        hotspot.outlinePoints[0].y * scalingFactor
+      );
+
       for (let i = 1; i < hotspot.outlinePoints.length; i++) {
         let point = hotspot.outlinePoints[i];
-        context.lineTo(point.x, point.y);
+        context.lineTo(point.x * scalingFactor, point.y * scalingFactor);
       }
-      //context.closePath();
       context.stroke();
-      //context.fill();
     }
   };
 
   useEffect(() => {
-    drawOutlines;
+    drawOutlines();
   }, [focusID]);
 
   const handleCanvasClick = (event: MouseEvent) => {
+    if (tooltipVisibleRef.current) {
+      console.log("Tooltip is already visible!");
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    console.log("at least we click");
-    console.log(hotspots);
-    // Determine which mask was clicked
+    let ultimateDivElement = document.getElementById("VSD-image-div");
+    if (!ultimateDivElement) return;
+    let ultimateDiv = ultimateDivElement.getBoundingClientRect();
+
     for (let i = 0; i < hotspots.length; i++) {
       const maskImg = new Image();
       maskImg.src = hotspots[i].mask as string;
@@ -201,56 +208,73 @@ function VSDImage({
         maskCtx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
         const imageData = maskCtx.getImageData(x, y, 1, 1).data;
 
-        // Check if the clicked pixel is semi-transparent
-        if (imageData[0] > 0) {
-          //Currently the masks will be red!
+        if (imageData[0] > 0 && !tooltipVisibleRef.current) {
           setFocusID(hotspots[i].id);
           console.log("Hotspot " + hotspots[i].id + " has been clicked!");
+          tooltipVisibleRef.current = true;
+
+          showTooltip(
+            hotspots[i].hotspotName,
+            event.clientX - ultimateDiv.left,
+            event.clientY - ultimateDiv.top
+          );
+
+          // After showing tooltip for the first matching hotspot, return to prevent processing others
           return;
         }
       };
     }
   };
 
-  const style: React.CSSProperties = {
+  const showTooltip = (text: string, x: number, y: number) => {
+    console.log("Showing tooltip");
+
+    setTooltip({ visible: true, text, x, y });
+
+    setTimeout(() => {
+      setTooltip((tooltip) => ({ ...tooltip, visible: false }));
+      tooltipVisibleRef.current = false;
+      console.log("Tooltip has been hidden");
+    }, 1000);
+
+    if ("speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(utterance);
+    } else {
+      console.log("Text-to-speech not supported in this browser.");
+    }
+  };
+
+  const imageStyle: React.CSSProperties = {
     maxWidth: "100%",
     maxHeight: "100%",
     backgroundImage: `url(${hotspotsImage})`,
-  }; /*
-  const optionStyle: React.CSSProperties = {
-    marginLeft: marginSize + "px",
-    marginRight: marginSize + "px",
-    width: optionWidth,
-  };*/
+  };
 
-  if (vsdMode == 3) {
-    return (
-      <div id="VSD-image-div">
-        <div id="VSD-image">
-          <canvas
-            ref={canvasRef}
-            id="VSD-canvas"
-            width={canvasDimensions[0]}
-            height={canvasDimensions[1]}
-            style={style}
-            className="canvas"
-          />
+  const tooltipStyle: React.CSSProperties = {
+    left: tooltip.x,
+    top: tooltip.y,
+    opacity: tooltip.visible ? 1 : 0,
+  };
+
+  return (
+    <div id="VSD-image-div">
+      <div id="VSD-image">
+        <canvas
+          ref={canvasRef}
+          id="VSD-canvas"
+          width={canvasDimensions[0]}
+          height={canvasDimensions[1]}
+          style={imageStyle}
+          className="canvas"
+        />
+
+        <div className="tooltip" style={tooltipStyle}>
+          {tooltip.text}
         </div>
-        {/*
-        <div id="VSD-options-div">
-          <div id="VSD-options">
-            {focusedHotspot
-              ? focusedHotspot.options.map((option) => (
-                  <button className="vsd-option" style={optionStyle}>
-                    {option}
-                  </button>
-                ))
-              : null}
-          </div>
-        </div>*/}
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 export default VSDImage;

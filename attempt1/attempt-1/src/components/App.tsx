@@ -101,6 +101,8 @@ function App() {
   //              3 = editing hotspot
   //              4 = final hotspot
 
+  // Change these States into individual screen states, like CameraState, EditState, VSDState, and have them be boolean!
+
   let [appState, setAppState] = useState(1);
   let [hotspotImage, setHotspotImage] = useState("");
   let [hotspots, setHotspots] = useState<Hotspot[]>([]);
