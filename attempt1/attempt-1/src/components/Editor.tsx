@@ -1,13 +1,12 @@
+import React, { useEffect } from "react";
 import "../style/Editor.css";
-
 import Hotspot from "./interfaces";
-import { indexOf, myHotspot } from "./functions.tsx";
+import { indexOf, myHotspot } from "./functions";
 
 export interface HotSpotData {
   hotspots: Hotspot[];
   hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
-
   focusID: string;
 }
 
@@ -19,6 +18,30 @@ function Editor({
 }: HotSpotData) {
   let hs = myHotspot(focusID, hotspots);
   let hsIndex = indexOf(focusID, hotspots);
+
+  useEffect(() => {
+    const handleFocus = (event: FocusEvent) => {
+      const target = event.target as HTMLInputElement;
+      target.value = "";
+    };
+
+    // Select all input elements
+    const inputElements =
+      document.querySelectorAll<HTMLInputElement>(".clear-on-focus");
+
+    // Add event listener to each input element
+    inputElements.forEach((input) => {
+      input.addEventListener("focus", handleFocus);
+    });
+
+    // Clean up event listeners on component unmount
+    return () => {
+      inputElements.forEach((input) => {
+        input.removeEventListener("focus", handleFocus);
+      });
+    };
+  }, [hotspots, focusID]);
+
   if (hsIndex >= 0 && hs) {
     return (
       <div className="editor-container">
@@ -27,10 +50,11 @@ function Editor({
           id="hotspotEditor"
           value={hs.hotspotName}
           onChange={(e) => {
-            hotspotsClone[hsIndex].hotspotName = e.target.value;
-            setHotspots(hotspotsClone);
+            const updatedHotspots = [...hotspotsClone];
+            updatedHotspots[hsIndex].hotspotName = e.target.value;
+            setHotspots(updatedHotspots);
           }}
-          className="editor-hotspot-name editor-input"
+          className="editor-hotspot-name editor-input clear-on-focus"
         />
         <ul className="editor-options">
           {hs.options.map((option: string, index: number) => (
@@ -39,20 +63,21 @@ function Editor({
                 type="text"
                 value={option}
                 onChange={(e) => {
-                  hotspotsClone[hsIndex].options[index] = e.target.value;
-                  setHotspots(hotspotsClone);
-                  console.log("whel");
+                  const updatedHotspots = [...hotspotsClone];
+                  updatedHotspots[hsIndex].options[index] = e.target.value;
+                  setHotspots(updatedHotspots);
                 }}
-                className="editor-input"
+                className="editor-input clear-on-focus"
               />
               <button
                 className="editor-option-button delete-button"
                 onClick={() => {
-                  hotspotsClone[hsIndex].options.splice(index, 1);
-                  setHotspots(hotspotsClone);
+                  const updatedHotspots = [...hotspotsClone];
+                  updatedHotspots[hsIndex].options.splice(index, 1);
+                  setHotspots(updatedHotspots);
                 }}
               >
-                x
+                ⨯
               </button>
             </li>
           ))}
@@ -61,9 +86,9 @@ function Editor({
               className="editor-option-button add-button"
               onClick={() => {
                 if (hs.options.length < 4) {
-                  hotspotsClone[hsIndex].options.push("");
-                  setHotspots(hotspotsClone);
-                  console.log("I've been PUSHEDD");
+                  const updatedHotspots = [...hotspotsClone];
+                  updatedHotspots[hsIndex].options.push("");
+                  setHotspots(updatedHotspots);
                 }
               }}
             >

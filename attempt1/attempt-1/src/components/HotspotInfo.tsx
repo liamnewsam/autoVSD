@@ -47,7 +47,7 @@ function HotSpotInfo({
             setFocusID("");
           }}
         >
-          x
+          ⨯
         </button>
         <h2 className="hotspotName">{hs.hotspotName}</h2>
         <ul className="options">

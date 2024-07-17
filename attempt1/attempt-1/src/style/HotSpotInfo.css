@@ -16,6 +16,8 @@
     font-size: 1.6em;
     margin-bottom: 10px;
     color: var(--text-color);
+    height: 20%;
+
 
 }
 
@@ -32,6 +34,8 @@
     border-radius: 4px;
     margin: 5px;
     padding: 5px 10px;
+
+    height: 30px;
 }
 /*
 .close-button {
@@ -53,9 +57,9 @@
     border: none;
     border-radius: 20%;
     color: white;
-    width: 20%;
+    height: 40px;
     aspect-ratio : 1 / 1;
-    font-size: 30px;
+    font-size: 1.8em;;
     font-weight: bold;
     display: flex;
     justify-content: center;
