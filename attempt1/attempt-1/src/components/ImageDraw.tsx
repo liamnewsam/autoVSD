@@ -204,7 +204,7 @@ function ImageDraw({
 
     let currentDrawingData: any[] = [];
 
-    const startDrawing = (event: TouchEvent) => {
+    const startDrawing = (event: MouseEvent | TouchEvent) => {
       setIsDrawing(true);
 
       clearCanvas();
@@ -219,7 +219,7 @@ function ImageDraw({
       });
     };
 
-    const draw = (event: TouchEvent) => {
+    const draw = (event: MouseEvent | TouchEvent) => {
       if (!isDrawing) return;
 
       const { offsetX, offsetY } = getMousePosition(canvas, event);
@@ -239,27 +239,45 @@ function ImageDraw({
       );
     };
 
+    const getMousePosition = (
+      canvas: HTMLCanvasElement,
+      event: MouseEvent | TouchEvent
+    ) => {
+      const rect = canvas.getBoundingClientRect();
+      if (event instanceof MouseEvent) {
+        return {
+          offsetX: event.clientX - rect.left,
+          offsetY: event.clientY - rect.top,
+        };
+      } else {
+        const touch = event.touches[0];
+        return {
+          offsetX: touch.clientX - rect.left,
+          offsetY: touch.clientY - rect.top,
+        };
+      }
+    };
+
+    canvas.addEventListener("mousedown", startDrawing);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", finishDrawing);
+    canvas.addEventListener("mouseout", finishDrawing);
     canvas.addEventListener("touchstart", startDrawing);
     canvas.addEventListener("touchmove", draw);
     canvas.addEventListener("touchend", finishDrawing);
     canvas.addEventListener("touchcancel", finishDrawing);
 
     return () => {
+      canvas.removeEventListener("mousedown", startDrawing);
+      canvas.removeEventListener("mousemove", draw);
+      canvas.removeEventListener("mouseup", finishDrawing);
+      canvas.removeEventListener("mouseout", finishDrawing);
       canvas.removeEventListener("touchstart", startDrawing);
       canvas.removeEventListener("touchmove", draw);
       canvas.removeEventListener("touchend", finishDrawing);
       canvas.removeEventListener("touchcancel", finishDrawing);
     };
   }, [isDrawing, focusID]);
-
-  const getMousePosition = (canvas: HTMLCanvasElement, event: TouchEvent) => {
-    const rect = canvas.getBoundingClientRect();
-    const touch = event.touches[0];
-    return {
-      offsetX: touch.clientX - rect.left,
-      offsetY: touch.clientY - rect.top,
-    };
-  };
 
   const style: React.CSSProperties = {
     maxWidth: "100%",
