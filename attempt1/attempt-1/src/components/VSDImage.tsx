@@ -59,8 +59,10 @@ function VSDImage({
   let backgroundImage = new Image();
   useEffect(() => {
     backgroundImage.src = hotspotsImage;
-    calculateCanvasSize(backgroundImage.width, backgroundImage.height);
-    setImageDimensions([backgroundImage.width, backgroundImage.height]);
+    backgroundImage.onload = () => {
+      setImageDimensions([backgroundImage.width, backgroundImage.height]);
+      calculateCanvasSize(backgroundImage.width, backgroundImage.height);
+    };
   }, [hotspotsImage]);
 
   let scalingFactor = (canvasDimensions[0] * 1.0) / imageDimensions[0];
@@ -115,18 +117,6 @@ function VSDImage({
     drawOutlines();
   }, [canvasDimensions]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    // Add click event listener
-    canvas.addEventListener("click", handleCanvasClick);
-
-    return () => {
-      canvas.removeEventListener("click", handleCanvasClick);
-    };
-  }, [canvasDimensions, hotspotsImage, hotspots]);
-
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -180,6 +170,7 @@ function VSDImage({
   }, [focusID]);
 
   const handleCanvasClick = (event: MouseEvent) => {
+    console.log("at least we are");
     if (tooltipVisibleRef.current) {
       console.log("Tooltip is already visible!");
       return;
@@ -219,12 +210,26 @@ function VSDImage({
             event.clientY - ultimateDiv.top
           );
 
-          // After showing tooltip for the first matching hotspot, return to prevent processing others
           return;
         }
       };
     }
   };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      console.log("what are we doing in here?");
+      return;
+    }
+    console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+    // Add click event listener
+    canvas.addEventListener("click", handleCanvasClick);
+
+    return () => {
+      canvas.removeEventListener("click", handleCanvasClick);
+    };
+  }, [canvasDimensions, hotspotsImage, hotspots]);
 
   const showTooltip = (text: string, x: number, y: number) => {
     console.log("Showing tooltip");
