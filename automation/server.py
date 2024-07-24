@@ -26,13 +26,7 @@ def write_image(fileName, image_data):
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
-def hello():
-    return 'Hello, World!'
-
-
 user_img_url = "./userImage.png"
-
 
 @app.route('/api/send-data', methods=['POST'])
 def receive_data():
@@ -40,6 +34,7 @@ def receive_data():
     write_image(user_img_url, image_data)
     
     hotspots = retrieve_data(user_img_url)
+    
     for hs in hotspots:
         print (hs.toJSON())
 

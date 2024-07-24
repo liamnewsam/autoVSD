@@ -7,29 +7,13 @@ import threading
 import shutil
 import random
 
-alpha_value = 77
-colors = [
-    [[255, 182, 193, alpha_value], [255, 105, 180, alpha_value]],  # Light Pink -> Hot Pink
-    [[144, 238, 144, alpha_value], [0, 128, 0, alpha_value]],       # Light Green -> Green
-    [[173, 216, 230, alpha_value], [0, 191, 255, alpha_value]],     # Light Blue -> Deep Sky Blue
-    [[240, 230, 140, alpha_value], [255, 215, 0, alpha_value]],     # Khaki -> Gold
-    [[255, 222, 173, alpha_value], [255, 140, 0, alpha_value]],     # Navajo White -> Dark Orange
-    [[221, 160, 221, alpha_value], [128, 0, 128, alpha_value]],     # Plum -> Purple
-    [[255, 228, 225, alpha_value], [255, 69, 0, alpha_value]],      # Misty Rose -> Red Orange
-    [[176, 224, 230, alpha_value], [0, 0, 139, alpha_value]],       # Powder Blue -> Dark Blue
-    [[240, 248, 255, alpha_value], [0, 0, 255, alpha_value]],       # Alice Blue -> Blue
-    [[255, 250, 205, alpha_value], [255, 255, 0, alpha_value]],     # Lemon Chiffon -> Yellow
-]
-
-
-
 class Hotspot:
     def __init__(self, hotspotName='', options=[]):
         self.hotspotName = hotspotName
         self.options = options
 
-    def print(self):
-        print (f"{self.hotspotName}: {self.options}")
+    def __str__(self):
+        return f"{self.hotspotName}: {self.options}"
 
     def toJSON(self):
         return {"hotspotName": self.hotspotName,

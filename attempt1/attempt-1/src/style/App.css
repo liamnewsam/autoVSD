@@ -1,10 +1,106 @@
 @import "variables.css";
 
 #container {
-  display: flex;
   height: 100vh; /* 100% of the viewport height */
-  background-color: var(--background-color);
+  max-height: 100vh;
+  max-width: 100vw;
+  /*background-color: var(--background-color);*/
+  background-color: var(--background-dark-2-color);
+  display: grid;
+  grid-template-rows: 70% auto; /* 70% for top-half, 30% for bottom-half */
+  box-sizing: border-box;
 
+  padding: 20px;
+  gap: 20px;
+}
+
+#top-half {
+  display: grid;
+  grid-template-columns: 40% auto; /* 40% for top-left-div, 60% for image-container */
+  gap: 20px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#top-left-div {
+  display: grid;
+  grid-template-rows: 70% auto; 
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+#editor-container {
+  /*padding: 20px;*/
+  background-color: var(--background-dark-1-color);
+  overflow: auto; /* Allow scrolling if content overflows */
+  height: 100%; /* Ensure the editor takes all available height */
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+#hotspot-menu-container {
+  padding: 10px;
+  background-color: var(--background-dark-1-color);
+  overflow: hidden; /* Prevent overflow within the menu container */
+  border-radius: 8px;
+}
+
+#image-container {
+  /*width: 100%;
+  height: 100%;*/
+  /*padding: 20px;*/
+  box-sizing: border-box;
+}
+
+#hotspots-container {
+  display: flex; /* Align items horizontally */
+  overflow-x: auto; /* Allow horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+  scrollbar-width: none; /* for Firefox */
+  padding: 10px;
+  border-radius: 8px;
+  gap: 10px;
+  background-color: var(--background-dark-1-color);
+  width: 100%;
+  height: 100%;
+
+}
+
+.add-hotspot {
+  flex: 0 0 150px; /* Set a fixed width for the items */
+  height: 150px; /* Set a fixed height for the items */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  overflow: hidden; /* Prevent content from overflowing */
+  background-color: var(--background-light-color); /* Example background color for add-hotspot */
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  cursor: pointer; /* Indicate that it is clickable */
+  font-size: 2em; /* Increase font size for the plus sign */
+}
+
+
+
+.sending-vsd-loading-screen {
+  height: 100vh;
+  color: var(--text-light-color);
+  font-size: 2em;
+  background-color: var(--background-dark-1-color);
+  display: flex;
+  justify-content: center;  /* Center horizontally */
+  align-items: center;      /* Center vertically */
+}
+
+
+.sending-vsd-loading-screen {
+  height: 100vh;
+  color: var(--text-light-color);
+  /*text-align: center;*/
+  font-size: 2em;
+  background-color: var(--background-dark-1-color);
+  display: flex;
+  justify-content: center;  /* Center horizontally */
+  align-items: center;      /* Center vertically */
 }
 
 #camera-container {
@@ -16,51 +112,4 @@
   /*
   display: flex;
   justify-content: center;*/
-}
-
-#left-half {
-  background-color: var(--background-dark-1-color);
-  /*background-color: var(--primary-color);*/
-
-  display: grid;
-  grid-template-rows: 40vh 50vh 10vh;
-
-  flex: 1;
-}
-
-#right-half {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Two columns of equal width */
-  grid-template-rows: repeat(4, 1fr);   /* Four rows of equal height */
-  gap: 20px; /* Optional: adds space between grid items */
-  height: 100vh; /* Optional: makes the grid container span the full viewport height */
-  flex: 1;
-  padding: 20px;
-}
-
-#image-container {
-  flex: 3;
-  padding-top: 5px;
-  padding-bottom: 5px
-}
-
-#editor-container {
-  padding: 20px;
-
-}
-
-#hotspot-menu-container {
-  padding: 10px;
-
-}
-
-.sending-vsd-loading-screen {
-  height: 100vh;
-  color: var(--text-light-color);
-  /*text-align: center;*/
-  font-size: 2em;
-  background-color: var(--background-dark-1-color);
-  display: flex;
-  justify-content: center;  /* Center horizontally */
-  align-items: center;      /* Center vertically */
 }

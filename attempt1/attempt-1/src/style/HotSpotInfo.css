@@ -2,7 +2,11 @@
 
 
 .hotSpotInfo {
-    flex: 1;
+    /*width: 500px !important;*/
+    height: 100%;
+
+    flex: 0 0 275px; /* Set a fixed width for the items */
+
 
     background-color: #fff;
     border-style: dashed;
@@ -10,6 +14,9 @@
     border-radius: 8px;
 
     padding: 20px;
+
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    overflow: hidden; /* Prevent content from overflowing */
     /*text-overflow: ellipsis;*/
 
 }
@@ -19,6 +26,9 @@
     margin-bottom: 10px;
     color: var(--text-color);
     height: 20%;
+    display: inline-block;
+    overflow-wrap: break-word;
+    max-width: 80%;
 
 
 }
@@ -83,23 +93,14 @@
 }
 
 .add-hotspot {
-    background-color: var(--secondary-color);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    width: 75px;
-    height: 75px;
-    font-size: 40px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    
 
-    /* Positioning properties */
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
+    /*background-color: var(--secondary-color);*/
+    border: solid;
+    border-width: 5px;
+    border-color: var(--secondary-color);
+    color:  var(--secondary-color);
+    display: flex;
+    font-size: 7em;
+
+
   }

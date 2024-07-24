@@ -203,18 +203,22 @@ function App() {
       <>
         {appState == 2 && <LoadingOverlay />}
         <div id="container">
-          <div id="left-half">
-            <div id="editor-container">
-              <Editor
-                hotspots={hotspots}
-                hotspotsClone={hotspotsClone}
-                setHotspots={setHotspots}
-                focusID={focusHotSpotID}
-              />
+          <div id="top-half">
+            <div id="top-left-div">
+              <div id="editor-container">
+                <Editor
+                  hotspots={hotspots}
+                  hotspotsClone={hotspotsClone}
+                  setHotspots={setHotspots}
+                  focusID={focusHotSpotID}
+                />
+              </div>
+              <div id="hotspot-menu-container">
+                <HotspotMenu setAppState={setAppState} />
+              </div>
             </div>
             <div id="image-container">
               <ImageDraw
-                //hotspotImage={hotspotImage}
                 hotspotImage={hotspotImage}
                 hotspots={hotspots}
                 hotspotsClone={hotspotsClone}
@@ -222,11 +226,9 @@ function App() {
                 focusID={focusHotSpotID}
               />
             </div>
-            <div id="hotspot-menu-container">
-              <HotspotMenu setAppState={setAppState} />
-            </div>
           </div>
-          <div id="right-half">
+
+          <div id="hotspots-container">
             {hotspots.map((items, index) => (
               <HotSpotInfo
                 hotspots={hotspots}
@@ -239,7 +241,7 @@ function App() {
               />
             ))}
             <div
-              className="add-hotspot"
+              className="hotSpotInfo add-hotspot"
               onClick={() => {
                 if (hotspots.length < 6) {
                   hotspotsClone.push({
