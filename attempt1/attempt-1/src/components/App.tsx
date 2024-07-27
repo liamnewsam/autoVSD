@@ -107,7 +107,6 @@ function App() {
   let [appState, setAppState] = useState(1);
   let [hotspotImage, setHotspotImage] = useState("");
   let [hotspots, setHotspots] = useState<Hotspot[]>([]);
-  //console.log(hotspots);
   let hotspotsClone = structuredClone(hotspots);
   let [focusHotSpotID, setFocusHotSpotID] = useState("");
 
@@ -145,8 +144,6 @@ function App() {
     }
   };
 
-  console.log(hotspots);
-
   useEffect(() => {
     if (hotspotImage) {
       setAppState(2);
@@ -162,30 +159,10 @@ function App() {
       colorsCopy = [...colors];
       colorsCopy = shuffle(colorsCopy);
     }
-
     if (appState == 5) {
-      /*
-      fetch("http://localhost:5000/api/send-VSD", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ hotspots: hotspots, image: hotspotImage }),
-      });*/
       setFocusHotSpotID("");
     }
   }, [appState]);
-
-  /*useEffect(() => {
-    let deleteIndex = indexOf(hotspotDeletion, hotspots);
-    setHotspots(
-      hotspots.filter((hotspot) => hotspot.id !== hotspots[deleteIndex].id)
-    );
-
-    //hotspotSetters.splice(deleteIndex, deleteIndex);
-    console.log("what?");
-    setFocusHotSpotID(-1);
-  }, [hotspotDeletion]);*/
 
   if (appState == 1) {
     return (
@@ -194,10 +171,6 @@ function App() {
       </div>
     );
   }
-  /*
-  if (appState == 2) {
-    return <div>Loading</div>;
-  }*/
   if (appState == 2 || appState == 3) {
     return (
       <>

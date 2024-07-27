@@ -74,15 +74,17 @@ function ImageDraw({
   setHotspots,
   focusID,
 }: ImageDrawProps) {
-  let hotspotsClone = structuredClone(hotspots);
-
-  let focusedHotspot = myHotspot(focusID, hotspotsClone);
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
   const [canvasDimensions, setCanvasDimensions] = useState([0, 0]);
-
   const [imageDimensions, setImageDimensions] = useState<number[]>([0, 0]);
+  const [isDrawing, setIsDrawing] = useState<boolean>(false);
+  const [drawingData, setDrawingData] = useState<any[]>([]); // State to hold drawing data
+  const [readyToDraw, setReadyToDraw] = useState(false);
+
+  let hotspotsClone = structuredClone(hotspots);
+  let focusedHotspot = myHotspot(focusID, hotspotsClone);
+  let backgroundImage = new Image();
+  let scalingFactor = (canvasDimensions[0] * 1.0) / imageDimensions[0];
 
   const calculateCanvasSize = (imageW: number, imageH: number) => {
     let parent = document.getElementById("canvas-container");
@@ -99,7 +101,6 @@ function ImageDraw({
     }
   };
 
-  let backgroundImage = new Image();
   useEffect(() => {
     backgroundImage.src = hotspotImage;
 
@@ -108,19 +109,6 @@ function ImageDraw({
       setImageDimensions([backgroundImage.width, backgroundImage.height]);
     };
   }, [hotspotImage]);
-
-  /*
-  const [scalingFactor, setScalingFactor] = useState(0);
-  useEffect(() => {
-    if (canvasDimensions[0] && imageDimensions[0]) {
-      setScalingFactor((canvasDimensions[0] * 1.0) / imageDimensions[0]);
-    }
-  }, [canvasDimensions, imageDimensions]);*/
-  let scalingFactor = (canvasDimensions[0] * 1.0) / imageDimensions[0];
-
-  const [isDrawing, setIsDrawing] = useState<boolean>(false);
-  const [drawingData, setDrawingData] = useState<any[]>([]); // State to hold drawing data
-  const [readyToDraw, setReadyToDraw] = useState(false);
 
   const clearCanvas = () => {
     const canvas = canvasRef.current;

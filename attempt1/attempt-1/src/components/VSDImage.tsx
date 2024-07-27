@@ -218,11 +218,7 @@ function VSDImage({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) {
-      console.log("what are we doing in here?");
-      return;
-    }
-    console.log("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+    if (!canvas) return;
     // Add click event listener
     canvas.addEventListener("click", handleCanvasClick);
 
