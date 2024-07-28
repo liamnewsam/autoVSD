@@ -170,7 +170,7 @@ function VSDImage({
     drawOutlines();
   }, [focusID]);
 
-  const handleCanvasClick = (event: MouseEvent) => {
+  const handleCanvasClick = (event: MouseEvent | TouchEvent) => {
     console.log("at least we are");
     if (tooltipVisibleRef.current) {
       console.log("Tooltip is already visible!");
@@ -180,12 +180,18 @@ function VSDImage({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
 
-    let ultimateDivElement = document.getElementById("VSD-image-div");
-    if (!ultimateDivElement) return;
-    let ultimateDiv = ultimateDivElement.getBoundingClientRect();
+    let x: number, y: number;
+    if (event instanceof MouseEvent) {
+      x = event.clientX - rect.left;
+      y = event.clientY - rect.top;
+    } else if (event instanceof TouchEvent) {
+      x = event.touches[0].clientX - rect.left;
+      y = event.touches[0].clientY - rect.top;
+      console.log(event.touches);
+    } else {
+      return;
+    }
 
     for (let i = 0; i < hotspots.length; i++) {
       const maskImg = new Image();
@@ -205,11 +211,7 @@ function VSDImage({
           console.log("Hotspot " + hotspots[i].id + " has been clicked!");
           tooltipVisibleRef.current = true;
 
-          showTooltip(
-            hotspots[i].hotspotName,
-            event.clientX - ultimateDiv.left,
-            event.clientY - ultimateDiv.top
-          );
+          showTooltip(hotspots[i].hotspotName, x + rect.left, y + rect.top);
 
           return;
         }
@@ -218,15 +220,18 @@ function VSDImage({
   };
 
   useEffect(() => {
+    console.log("hello");
     const canvas = canvasRef.current;
     if (!canvas) return;
     // Add click event listener
     canvas.addEventListener("click", handleCanvasClick);
+    canvas.addEventListener("touchstart", handleCanvasClick);
 
     return () => {
       canvas.removeEventListener("click", handleCanvasClick);
+      canvas.removeEventListener("touchstart", handleCanvasClick);
     };
-  }, [canvasDimensions, hotspotsImage, hotspots]);
+  }, [canvasDimensions, hotspotsImage, hotspots, focusID]);
 
   const showTooltip = (text: string, x: number, y: number) => {
     console.log("Showing tooltip");
@@ -258,6 +263,7 @@ function VSDImage({
     left: tooltip.x,
     top: tooltip.y,
     opacity: tooltip.visible ? 1 : 0,
+    pointerEvents: "none",
   };
 
   return (
