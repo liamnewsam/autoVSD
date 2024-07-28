@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-
 import "../style/App.css";
 import "../style/HotSpotInfo.css";
 
@@ -8,107 +7,25 @@ import Editor from "./Editor.tsx";
 import ImageDraw from "./ImageDraw.tsx";
 import Camera from "./Camera.tsx";
 import HotspotMenu from "./HotspotMenu.tsx";
-import Hotspot from "./interfaces.tsx";
-import { RGB } from "./interfaces.tsx";
+import { Hotspot, RGB } from "./interfaces.tsx";
 import InteractiveVSD from "./InteractiveVSD.tsx";
-import { getRandomInt } from "./functions.tsx";
+import { getRandomInt, shuffle } from "./functions.tsx";
 import LoadingOverlay from "./LoadingOverlay.tsx";
 
 import sampleVSDData from "../assets/sampleVSD.json";
-
-//import imageObject from "../assets/ex1.png";
-
-export function shuffle<T>(array: T[]): T[] {
-  let currentIndex = array.length,
-    randomIndex;
-
-  // While there remain elements to shuffle.
-  while (currentIndex != 0) {
-    // Pick a remaining element.
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-
-    // And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ];
-  }
-
-  return array;
-}
-
-let colors: [defaultColor: RGB, focusColor: RGB][] = [
-  [
-    [255, 235, 238],
-    [255, 205, 210],
-  ], // Light Pink
-  [
-    [248, 187, 208],
-    [244, 143, 177],
-  ], // Light Pink 2
-  [
-    [209, 196, 233],
-    [179, 157, 219],
-  ], // Light Purple
-  [
-    [197, 202, 233],
-    [159, 168, 218],
-  ], // Light Indigo
-  [
-    [187, 222, 251],
-    [144, 202, 249],
-  ], // Light Blue
-  [
-    [179, 229, 252],
-    [129, 212, 250],
-  ], // Light Sky Blue
-  [
-    [178, 235, 242],
-    [128, 222, 234],
-  ], // Light Cyan
-  [
-    [178, 223, 219],
-    [128, 203, 196],
-  ], // Light Teal
-  [
-    [197, 225, 165],
-    [174, 213, 129],
-  ], // Light Green
-  [
-    [230, 238, 156],
-    [220, 231, 117],
-  ], // Light Lime
-  [
-    [255, 245, 157],
-    [255, 241, 118],
-  ], // Light Yellow
-  [
-    [255, 224, 178],
-    [255, 204, 128],
-  ], // Light Orange
-  [
-    [255, 204, 188],
-    [255, 171, 145],
-  ], // Light Deep Orange
-];
-let colorsCopy: [defaultColor: RGB, focusColor: RGB][];
+import { initialColors } from "./colors.tsx";
 
 function App() {
-  // App State:
-  //              1 = taking photo
-  //              2 = loading screen
-  //              3 = editing hotspot
-  //              4 = sending vsd
-  //              5 = final hotspot
+  const [isCameraState, setIsCameraState] = useState(true);
+  const [isLoadingState, setIsLoadingState] = useState(false);
+  const [isEditingState, setIsEditingState] = useState(false);
+  const [isSendingState, setIsSendingState] = useState(false);
+  const [isFinalState, setIsFinalState] = useState(false);
 
-  // Change these States into individual screen states, like CameraState, EditState, VSDState, and have them be boolean!
-
-  let [appState, setAppState] = useState(1);
-  let [hotspotImage, setHotspotImage] = useState("");
-  let [hotspots, setHotspots] = useState<Hotspot[]>([]);
-  let hotspotsClone = structuredClone(hotspots);
-  let [focusHotSpotID, setFocusHotSpotID] = useState("");
+  const [hotspotImage, setHotspotImage] = useState("");
+  const [hotspots, setHotspots] = useState<Hotspot[]>([]);
+  const [focusHotSpotID, setFocusHotSpotID] = useState("");
+  const [colors, setColors] = useState(initialColors);
 
   const sendImageToBackend = async () => {
     try {
@@ -131,135 +48,152 @@ function App() {
             hotspotName: datum.hotspotName,
             options: datum.options,
             id: crypto.randomUUID(),
-            color: colorsCopy.pop(),
+            color: colors.pop(),
             outlinePoints: [],
           })
         )
-      ); // Set response data in state
-      colors = colors.slice(hotspots.length);
-      setAppState(3);
+      );
+      setColors(colors.slice(hotspots.length));
+      setIsLoadingState(false);
     } catch (error) {
       console.error("Error sending data:", error);
-      // Handle error state if needed
     }
+  };
+
+  const resetAppStates = () => {
+    setIsCameraState(false);
+    setIsEditingState(false);
+    setIsFinalState(false);
+    setIsLoadingState(false);
+    setIsSendingState(false);
   };
 
   useEffect(() => {
     if (hotspotImage) {
-      setAppState(2);
+      setIsCameraState(false);
+      setIsEditingState(true);
+      setIsLoadingState(true);
       sendImageToBackend();
     }
   }, [hotspotImage]);
 
-  useEffect(() => {
-    if (appState == 1) {
-      setHotspotImage("");
-      setHotspots([]);
-      setFocusHotSpotID("");
-      colorsCopy = [...colors];
-      colorsCopy = shuffle(colorsCopy);
-    }
-    if (appState == 5) {
-      setFocusHotSpotID("");
-    }
-  }, [appState]);
+  const activateNewVSD = () => {
+    setHotspotImage("");
+    setHotspots([]);
+    setFocusHotSpotID("");
+    setColors(shuffle([...initialColors]));
 
-  if (appState == 1) {
-    return (
-      <div id="camera-container">
-        <Camera setHotspotImage={setHotspotImage} />
-      </div>
-    );
-  }
-  if (appState == 2 || appState == 3) {
-    return (
-      <>
-        {appState == 2 && <LoadingOverlay />}
-        <div id="container">
-          <div id="top-half">
-            <div id="top-left-div">
-              <div id="editor-container">
-                <Editor
-                  hotspots={hotspots}
-                  hotspotsClone={hotspotsClone}
-                  setHotspots={setHotspots}
-                  focusID={focusHotSpotID}
-                />
-              </div>
-              <div id="hotspot-menu-container">
-                <HotspotMenu setAppState={setAppState} />
-              </div>
-            </div>
-            <div id="image-container">
-              <ImageDraw
-                hotspotImage={hotspotImage}
+    resetAppStates();
+    setIsCameraState(true);
+  };
+
+  const activateSendVSD = () => {
+    setTimeout(() => {
+      setFocusHotSpotID("");
+      setIsSendingState(false);
+      setIsFinalState(true);
+    }, 2000);
+    setIsEditingState(false);
+    setIsSendingState(true);
+  };
+
+  const renderCamera = () => (
+    <div id="camera-container">
+      <Camera setHotspotImage={setHotspotImage} />
+    </div>
+  );
+
+  const renderEditor = () => (
+    <>
+      {isLoadingState && <LoadingOverlay />}
+      <div id="container">
+        <div id="top-half">
+          <div id="top-left-div">
+            <div id="editor-container">
+              <Editor
                 hotspots={hotspots}
-                hotspotsClone={hotspotsClone}
                 setHotspots={setHotspots}
                 focusID={focusHotSpotID}
+              />
+            </div>
+            <div id="hotspot-menu-container">
+              <HotspotMenu
+                activateSendVSD={activateSendVSD}
+                activateNewVSD={activateNewVSD}
               />
             </div>
           </div>
-
-          <div id="hotspots-container">
-            {hotspots.map((items, index) => (
-              <HotSpotInfo
-                hotspots={hotspots}
-                hotspotsClone={hotspotsClone}
-                setHotspots={setHotspots}
-                setFocusID={setFocusHotSpotID}
-                focusID={focusHotSpotID}
-                id={items.id}
-                key={index}
-              />
-            ))}
-            <div
-              className="hotSpotInfo add-hotspot"
-              onClick={() => {
-                if (hotspots.length < 6) {
-                  hotspotsClone.push({
+          <div id="image-container">
+            <ImageDraw
+              hotspotImage={hotspotImage}
+              hotspots={hotspots}
+              setHotspots={setHotspots}
+              focusID={focusHotSpotID}
+            />
+          </div>
+        </div>
+        <div id="hotspots-container">
+          {hotspots.map((items, index) => (
+            <HotSpotInfo
+              key={index}
+              hotspots={hotspots}
+              setHotspots={setHotspots}
+              setFocusID={setFocusHotSpotID}
+              focusID={focusHotSpotID}
+              id={items.id}
+            />
+          ))}
+          <div
+            className="hotSpotInfo add-hotspot"
+            onClick={() => {
+              if (hotspots.length < 6) {
+                setHotspots([
+                  ...hotspots,
+                  {
                     hotspotName: "Hotspot",
                     options: ["option1", "option2", "option3"],
                     id: crypto.randomUUID(),
-                    color: colorsCopy.pop() || [
+                    color: colors.pop() || [
                       [0, 0, 0],
                       [0, 0, 0],
                     ],
                     outlinePoints: [],
-                  });
-                  setHotspots(hotspotsClone);
-                  console.log("add!");
-                }
-              }}
-            >
-              +
-            </div>
+                  },
+                ]);
+                console.log("add!");
+              }
+            }}
+          >
+            +
           </div>
         </div>
-      </>
-    );
-  }
-  if (appState == 4) {
-    setTimeout(() => {
-      setAppState(5);
-    }, 2000);
+      </div>
+    </>
+  );
+
+  const renderSending = () => {
     return (
       <div className="sending-vsd-loading-screen">Sending VSD to User</div>
     );
-  }
-  if (appState == 5) {
-    return (
-      <InteractiveVSD
-        hotspots={hotspots}
-        hotspotsClone={hotspotsClone}
-        hotspotsImage={hotspotImage}
-        setAppState={setAppState}
-        focusID={focusHotSpotID}
-        setFocusID={setFocusHotSpotID}
-        setHotspots={setHotspots}
-      />
-    );
-  }
+  };
+
+  const renderFinal = () => (
+    <InteractiveVSD
+      hotspots={hotspots}
+      hotspotsImage={hotspotImage}
+      activateNewVSD={activateNewVSD}
+      focusID={focusHotSpotID}
+      setFocusID={setFocusHotSpotID}
+      setHotspots={setHotspots}
+    />
+  );
+
+  if (isCameraState) return renderCamera();
+  if (isLoadingState || isEditingState) return renderEditor();
+  if (isSendingState) return renderSending();
+  if (isFinalState) return renderFinal();
+
+  return null; // Default return in case no state matches
 }
 
 export default App;

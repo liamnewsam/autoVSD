@@ -1,71 +1,20 @@
 import { useRef, useEffect, useState } from "react";
 import "../style/ImageDraw.css";
 
-import Hotspot from "./interfaces.tsx";
-import { indexOf, myHotspot, arrayToRgba, arrayToRGB } from "./functions.tsx";
+import { Hotspot } from "./interfaces.tsx";
+import {
+  indexOf,
+  myHotspot,
+  arrayToRGB,
+  chaikinSmooth,
+  decreasePointDensity,
+} from "./functions.tsx";
 
 interface ImageDrawProps {
   hotspotImage: string;
   hotspots: Hotspot[];
-  hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
   focusID: string;
-}
-interface Point {
-  x: number;
-  y: number;
-}
-
-const outlineThickness = 4;
-
-function chaikinSmooth(points: Point[], iterations: number = 5): Point[] {
-  if (points.length < 3) return points; // No need to smooth if there are less than 3 points
-
-  const smoothPoints = (pts: Point[]): Point[] => {
-    let newPoints: Point[] = [];
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[i];
-      const p1 = pts[i + 1];
-      const Q = { x: 0.75 * p0.x + 0.25 * p1.x, y: 0.75 * p0.y + 0.25 * p1.y };
-      const R = { x: 0.25 * p0.x + 0.75 * p1.x, y: 0.25 * p0.y + 0.75 * p1.y };
-      newPoints.push(Q, R);
-    }
-    // Handle closing the shape by connecting the last point to the first point
-    const firstPoint = pts[0];
-    const lastPoint = pts[pts.length - 1];
-    const Q = {
-      x: 0.75 * lastPoint.x + 0.25 * firstPoint.x,
-      y: 0.75 * lastPoint.y + 0.25 * firstPoint.y,
-    };
-    const R = {
-      x: 0.25 * lastPoint.x + 0.75 * firstPoint.x,
-      y: 0.25 * lastPoint.y + 0.75 * firstPoint.y,
-    };
-    newPoints.push(Q, R);
-    newPoints.push(newPoints[0]); // Ensure the shape is closed
-    return newPoints;
-  };
-
-  let smoothedPoints = points;
-  for (let i = 0; i < iterations; i++) {
-    smoothedPoints = smoothPoints(smoothedPoints);
-  }
-  return smoothedPoints;
-}
-
-function decreasePointDensity(
-  points: { x: number; y: number }[],
-  factor: number
-) {
-  if (factor <= 1) {
-    return points; // Factor of 1 or less means no reduction
-  }
-
-  const reducedPoints = [];
-  for (let i = 0; i < points.length; i += factor) {
-    reducedPoints.push(points[i]);
-  }
-  return reducedPoints;
 }
 
 function ImageDraw({
@@ -127,7 +76,7 @@ function ImageDraw({
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    context.lineWidth = outlineThickness;
+    context.lineWidth = 4;
     context.lineCap = "round";
     context.lineJoin = "round";
 
@@ -186,7 +135,7 @@ function ImageDraw({
 
     if (!focusedHotspot) return;
     context.strokeStyle = arrayToRGB(focusedHotspot.color[1]);
-    context.lineWidth = outlineThickness;
+    context.lineWidth = 4;
     context.lineCap = "round";
     context.lineJoin = "round";
 

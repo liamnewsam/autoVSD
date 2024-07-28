@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import Hotspot from "./interfaces";
+import { Hotspot } from "./interfaces";
 import "../style/VSDImage.css";
 import { myHotspot } from "./functions";
 import { arrayToRGB } from "./functions";
@@ -10,7 +10,6 @@ let outlineThickness = 10;
 interface VSDImageData {
   hotspotsImage: string;
   hotspots: Hotspot[];
-  hotspotsClone: Hotspot[];
   focusID: string;
   setFocusID: (x: string) => void;
   setHotspots: (x: Hotspot[]) => void;
@@ -20,7 +19,6 @@ interface VSDImageData {
 function VSDImage({
   hotspotsImage,
   hotspots,
-  hotspotsClone,
   focusID,
   setFocusID,
   setHotspots,
@@ -80,8 +78,8 @@ function VSDImage({
       return;
     }
 
-    for (let hs of hotspotsClone) {
-      if (hs.outlinePoints.length == 0) continue;
+    const updatedHotspots = hotspots.map((hs) => {
+      if (hs.outlinePoints.length === 0) return hs;
 
       clearCanvas();
 
@@ -104,10 +102,13 @@ function VSDImage({
       context.stroke();
       context.fill();
 
-      hs.mask = canvas.toDataURL("image/png");
-    }
+      return {
+        ...hs,
+        mask: canvas.toDataURL("image/png"),
+      };
+    });
 
-    setHotspots(hotspotsClone);
+    setHotspots(updatedHotspots);
     clearCanvas();
   };
 

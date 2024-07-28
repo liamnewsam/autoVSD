@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import Hotspot from "./interfaces";
+import { Hotspot } from "./interfaces";
 import VSDMenu from "./VSDMenu.tsx";
 import VSDImage from "./VSDImage.tsx";
 import "../style/InteractiveVSD.css";
@@ -7,8 +7,7 @@ import "../style/InteractiveVSD.css";
 interface InteractiveVSDData {
   hotspotsImage: string;
   hotspots: Hotspot[];
-  hotspotsClone: Hotspot[];
-  setAppState: (x: number) => void;
+  activateNewVSD: () => void;
   focusID: string;
   setFocusID: (x: string) => void;
   setHotspots: (x: Hotspot[]) => void;
@@ -17,8 +16,7 @@ interface InteractiveVSDData {
 function InteractiveVSD({
   hotspotsImage,
   hotspots,
-  hotspotsClone,
-  setAppState,
+  activateNewVSD,
   focusID,
   setFocusID,
   setHotspots,
@@ -29,13 +27,12 @@ function InteractiveVSD({
       <VSDImage
         hotspotsImage={hotspotsImage}
         hotspots={hotspots}
-        hotspotsClone={hotspotsClone}
         focusID={focusID}
         setFocusID={setFocusID}
         setHotspots={setHotspots}
         vsdMode={3}
       />
-      <VSDMenu setAppState={setAppState} />
+      <VSDMenu activateNewVSD={activateNewVSD} />
     </div>
   );
 }

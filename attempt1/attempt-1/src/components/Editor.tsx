@@ -1,18 +1,17 @@
 import React, { useEffect } from "react";
 import "../style/Editor.css";
-import Hotspot from "./interfaces";
+import { Hotspot } from "./interfaces";
 import { indexOf, myHotspot } from "./functions";
 
 export interface HotSpotData {
   hotspots: Hotspot[];
-  hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
   focusID: string;
 }
 
 function Editor({
   hotspots,
-  hotspotsClone,
+
   setHotspots,
   focusID,
 }: HotSpotData) {
@@ -50,8 +49,11 @@ function Editor({
           id="hotspotEditor"
           value={hs.hotspotName}
           onChange={(e) => {
-            const updatedHotspots = [...hotspotsClone];
-            updatedHotspots[hsIndex].hotspotName = e.target.value;
+            const updatedHotspots = hotspots.map((hotspot, index) =>
+              index === hsIndex
+                ? { ...hotspot, hotspotName: e.target.value }
+                : hotspot
+            );
             setHotspots(updatedHotspots);
           }}
           className="editor-hotspot-name editor-input clear-on-focus"
@@ -63,8 +65,16 @@ function Editor({
                 type="text"
                 value={option}
                 onChange={(e) => {
-                  const updatedHotspots = [...hotspotsClone];
-                  updatedHotspots[hsIndex].options[index] = e.target.value;
+                  const updatedHotspots = hotspots.map((hotspot, index) =>
+                    index === hsIndex
+                      ? {
+                          ...hotspot,
+                          options: hotspot.options.map((option, optIndex) =>
+                            optIndex === index ? e.target.value : option
+                          ),
+                        }
+                      : hotspot
+                  );
                   setHotspots(updatedHotspots);
                 }}
                 className="editor-input clear-on-focus"
@@ -72,8 +82,16 @@ function Editor({
               <button
                 className="editor-option-button delete-button"
                 onClick={() => {
-                  const updatedHotspots = [...hotspotsClone];
-                  updatedHotspots[hsIndex].options.splice(index, 1);
+                  const updatedHotspots = hotspots.map((hotspot, index) =>
+                    index === hsIndex
+                      ? {
+                          ...hotspot,
+                          options: hotspot.options.filter(
+                            (_, optIndex) => optIndex !== index
+                          ),
+                        }
+                      : hotspot
+                  );
                   setHotspots(updatedHotspots);
                 }}
               >
@@ -86,8 +104,12 @@ function Editor({
               className="editor-option-button add-button"
               onClick={() => {
                 if (hs.options.length < 4) {
-                  const updatedHotspots = [...hotspotsClone];
-                  updatedHotspots[hsIndex].options.push("");
+                  const updatedHotspots = hotspots.map(
+                    (hotspot, hotspotIndex) =>
+                      hotspotIndex === hsIndex
+                        ? { ...hotspot, options: [...hotspot.options, ""] }
+                        : hotspot
+                  );
                   setHotspots(updatedHotspots);
                 }
               }}

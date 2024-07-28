@@ -1,19 +1,20 @@
 import "../style/HotspotMenu.css";
 
 interface MenuData {
-  setAppState: (x: number) => void;
+  activateSendVSD: () => void;
+  activateNewVSD: () => void;
 }
 
-function HotspotMenu({ setAppState }: MenuData) {
+function HotspotMenu({ activateSendVSD, activateNewVSD }: MenuData) {
   return (
     <div className="menu-div">
       <button className="hotspot-menu-button">Archive</button>
-      <button className="hotspot-menu-button" onClick={() => setAppState(1)}>
+      <button className="hotspot-menu-button" onClick={() => activateNewVSD()}>
         New VSD
       </button>
       <button
         className="hotspot-menu-button accented-hotspot-menu-button"
-        onClick={() => setAppState(4)}
+        onClick={() => activateSendVSD()}
       >
         Send VSD
       </button>

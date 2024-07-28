@@ -1,10 +1,9 @@
 import "../style/HotSpotInfo.css";
-import Hotspot from "./interfaces.tsx";
+import { Hotspot } from "./interfaces.tsx";
 import { indexOf, myHotspot, arrayToRGB } from "./functions.tsx";
 
 export interface HotSpotData {
   hotspots: Hotspot[];
-  hotspotsClone: Hotspot[];
   setHotspots: (x: Hotspot[]) => void;
   setFocusID: (x: string) => void;
   //setHotspotDeletion: (id: number) => void;
@@ -15,7 +14,6 @@ export interface HotSpotData {
 
 function HotSpotInfo({
   hotspots,
-  hotspotsClone,
   setHotspots,
   setFocusID,
   focusID,
@@ -40,10 +38,9 @@ function HotSpotInfo({
           type="button"
           className="close-button"
           aria-label="Close"
-          onClick={(event) => {
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
-            hotspotsClone.splice(hsIndex, 1);
-            setHotspots(hotspotsClone);
+            setHotspots(hotspots.filter((_, index) => index !== hsIndex));
             setFocusID("");
           }}
         >
@@ -51,7 +48,7 @@ function HotSpotInfo({
         </button>
         <h2 className="hotspotName">{hs.hotspotName}</h2>
         <ul className="options">
-          {hs.options.map((option, index) => (
+          {hs.options.map((option: string, index: number) => (
             <li className="option" key={index}>
               {option}
             </li>

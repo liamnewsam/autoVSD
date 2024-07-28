@@ -1,6 +1,6 @@
 type RGB = [number, number, number];
 
-interface Hotspot {
+export interface Hotspot {
   hotspotName: string;
   options: string[];
   id: string;
@@ -9,5 +9,11 @@ interface Hotspot {
   mask?: string;
 }
 
-export default Hotspot;
+export interface Point {
+  x: number;
+  y: number;
+}
+// Export Hotspot, Point, and RGB as named exports
+
+// Export RGB as a named export
 export type { RGB };
